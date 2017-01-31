@@ -4,7 +4,7 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 
 app.get('/', function(req, res, next) {
     console.log("")
-    res.sendFile('/home/guigouma/capstone/myapp/pj/index.html');
+    res.sendFile('/home/guigouma/capstone/split_match/pj/index.html');
 });
 
 var server = app.listen(9000);
