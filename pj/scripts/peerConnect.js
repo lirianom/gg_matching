@@ -29,11 +29,13 @@ peer.on('error', function(err) {
 
 function connect(c) {
     $('#rid').val(c.peer);
-	connected = true;
-    c.on('data', function(data) {
-        $(".active").prepend(data + c.label + "<br>");
-    });
-    connectedPeers[c.peer] = 1;
+    connected = true;
+   	c.on('data', function(data) {
+       	$(".active").prepend(data + c.label + "<br>");
+   });
+   connectedPeers[c.peer] = 1;
+   peer.disconnect(); // Still connected to its peer just cant accpet any other requets
+	// Can use reconnect to connect it back to the server allowing new connections.
 }
 
 function createConnection(labelVal) {
@@ -42,7 +44,9 @@ function createConnection(labelVal) {
 		var conn = peer.connect(requestedPeer, {label: labelVal});
 		conn.on('open', function() {
 			connected = true;
+			console.log("help");
 			connect(conn);
+			peer.disconnect(); // Still connected to its peer just cant accept any other requests
 		});
 		conn.on('error', function(err) { alert(err); });
 	}
@@ -67,7 +71,8 @@ function sleep(delay) {
 }
 
 function attemptConnection() {
-	// Async Call 
+	// Async Call
+	// possible solution http://stackoverflow.com/questions/20775958/broadcast-or-peer-discovery-with-peerjs 
 	peer.listAllPeers( function(res) {
    		autoConnection(res);
 	});
