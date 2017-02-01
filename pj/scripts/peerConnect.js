@@ -14,10 +14,10 @@ var peer = new Peer({
     	$('.log').append(copy + '<br>');
   }
 });
-
 var connectedPeers = {};
-
+var connected = false;
 peer.on('open', function(id){
+  $('#pid').val(id);
   $('#pid').text(id);
 });
 
@@ -29,6 +29,7 @@ peer.on('error', function(err) {
 
 function connect(c) {
     $('#rid').val(c.peer);
+	connected = true;
     c.on('data', function(data) {
         $(".active").prepend(data + c.label + "<br>");
     });
@@ -40,6 +41,7 @@ function createConnection(labelVal) {
 	if (!connectedPeers[requestedPeer]) {
 		var conn = peer.connect(requestedPeer, {label: labelVal});
 		conn.on('open', function() {
+			connected = true;
 			connect(conn);
 		});
 		conn.on('error', function(err) { alert(err); });
@@ -47,14 +49,28 @@ function createConnection(labelVal) {
 	connectedPeers[requestedPeer] = 1;
 }
 
-function autoConnection(res) {
+function autoConnection(res) {	
 	for (var i = 0, ii = res.length; i < ii; i += 1) {
-		$("#rid").val(res[i]);
-		if (res[i] != $("#pid")) {
+		console.log(res[i]);
+		if (res[i] != $("#pid").val()) {
+			$("#rid").val(res[i]);
 			createConnection("autoConnection");
-			break;
+			return true;
 		}
 	}
+	return false;
+}
+
+function sleep(delay) {
+	var start = new Date().getTime();
+	while (new Date().getTime() < start + delay);
+}
+
+function attemptConnection() {
+	// Async Call 
+	peer.listAllPeers( function(res) {
+   		autoConnection(res);
+	});
 }
 
 $(document).ready(function() {
@@ -62,7 +78,20 @@ $(document).ready(function() {
  		createConnection("manualConnection"); 
 	});
     $('#autoConnect').click(function() {
-		peer.listAllPeers( function(res) { autoConnection(res); })
+		var response = false;
+		var retryConnection = 10;
+		console.log("Trying connection...");
+		//while ( !response && retryConnection != 0 ) {
+		//	console.log("Looking for peer...");
+			attemptConnection();
+				
+		//	if (!connected) {
+		//		console.log("No peer found. Retrying connection in 5 seconds. Attempt " + (10 - retryConnection + 1) + "/10");
+		//		retryConnection -= 1;
+		//		sleep(500);
+		//	}
+		//	else { response = true; }
+		//} 
 	});
 });
 
