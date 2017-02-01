@@ -28,10 +28,11 @@ peer.on('error', function(err) {
 })
 
 function connect(c) {
+	$('#rid').val(c.peer);
 
     //if (c.label === 'game') {
         c.on('data', function(data) {
-            $(".active").prepend(data + "<br>");
+            $(".active").prepend(data + c.label + "<br>");
         });
     //}
     connectedPeers[c.peer] = 1;
