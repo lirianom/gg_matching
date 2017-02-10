@@ -18,33 +18,33 @@ $(document).ready(function() {
 */
 
 var peer = new Peer({
-  host : 'adb07.cs.appstate.edu',
-  port : 9000,
-  path : '/',
-  debug: 3,
-  allow_discovery : true, //https://github.com/sheab/senet/issues/1
-  config: {'iceServers': [
-  	{ urls: 'stun:stun1.l.google.com:19302' },
-  	{ urls: 'turn:numb.viagenie.ca',
+	host : 'adb07.cs.appstate.edu',
+  	port : 9000,
+	path : '/',
+  	debug: 3,
+ 	allow_discovery : true, //https://github.com/sheab/senet/issues/1
+  	config: {'iceServers': [
+  		{ urls: 'stun:stun1.l.google.com:19302' },
+  		{ urls: 'turn:numb.viagenie.ca',
     		credential: 'muazkh', username: 'webrtc@live.com' }
-  ]}, 
-  logFunction: function() {
-  	var copy = Array.prototype.slice.call(arguments).join(' ');
-    	$('.log').append(copy + '<br>');
-  }
+  	]}, 
+  	logFunction: function() {
+  		var copy = Array.prototype.slice.call(arguments).join(' ');
+    		$('.log').append(copy + '<br>');
+  	}
 });
 
 var connectedPeers = {};
 var connected = false;
 peer.on('open', function(id){
-  $('#pid').val(id);
-  $('#pid').text(id);
+  	$('#pid').val(id);
+  	$('#pid').text(id);
 });
 
 // Await connections from others
 peer.on('connection', connect);
 peer.on('error', function(err) {
-  console.log(err);
+  	console.log(err);
 })
 
 function connect(c) {
@@ -52,18 +52,18 @@ function connect(c) {
     connected = true;
     c.on('data', function(data) {
        	$(".active").prepend(data + c.label + "<br>");
-	handleData(data);
-   });
-   connectedPeers[c.peer] = 1;
-   //peer.disconnect(); // Still connected to its peer just cant accpet any other requets
+		handleData(data);
+   	});
+	connectedPeers[c.peer] = 1;
+    //peer.disconnect(); // Still connected to its peer just cant accpet any other requets
    // Can use reconnect to connect it back to the server allowing new connections.
 }
 
 function eachActiveConnection(fn) {
-    var checkedIds = {};
+	var checkedIds = {};
     for (var peerId in connectedPeers) {
-        if (!checkedIds[peerId]) {
-            var conns = peer.connections[peerId];
+    	if (!checkedIds[peerId]) {
+        	var conns = peer.connections[peerId];
             for (var i = 0, ii = conns.length; i < ii; i += 1) {
                 var conn = conns[i];
                 fn(conn, $(this));
@@ -75,7 +75,7 @@ function eachActiveConnection(fn) {
 
 
 window.onunload = window.onbeforeunload = function(e) {
-    if (!!peer && !peer.destroyed) {
+	if (!!peer && !peer.destroyed) {
         peer.destroy();
     }
 };

@@ -30,7 +30,6 @@ function handleData(data) {
         readyList = $.unique(readyList);
         game();
     }
-
 }
 
 function countdownComplete() {
@@ -58,8 +57,8 @@ function determineVictory() {
 	else if (myMove == "Paper" && oppChoice == "Rock") $("#result").html("W");
 	else if (myMove == "Paper" && oppChoice == "Scissors") $("#result").html("L");
 	else if (myMove == "Rock" && oppChoice == "Paper") $("#result").html("L");
-    else if (myMove == "Rock" && oppChoice == "Scissors") $("#result").html("W");
-    else if (myMove == "Scissors" && oppChoice == "Rock") $("#result").html("L");
+   	else if (myMove == "Rock" && oppChoice == "Scissors") $("#result").html("W");
+   	else if (myMove == "Scissors" && oppChoice == "Rock") $("#result").html("L");
     else if (myMove == "Scissors" && oppChoice == "Paper") $("#result").html("W");
 
 
