@@ -12,7 +12,7 @@ var options = { debug : true, allow_discovery : true , proxied:true};
 
 app.use('/', ExpressPeerServer(server,options));
 app.use("/scripts", express.static(__dirname + '/pj/scripts'));
-
+app.use("/games", express.static(__dirname + '/pj/games'));
 
 server.on('connection', function(id) {
     console.log(id)

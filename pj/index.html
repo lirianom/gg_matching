@@ -8,20 +8,24 @@
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
     <script src="scripts/peerConnect.js"></script>
     <script src="scripts/copyToClip.js"></script>
-<body>
-    	
-    <p>
-	Your ID is <span id="pid"></span>    
-        <button id="copyId">Copy</button>
-	<button id="autoConnect">Auto Connect</button>
-    </p>
-    <p>
-        Connect to a peer:
-        <input type="text" id="rid" placeholder="Someone else's id"><input class="button" type="button" value="Connect" id="connect">
-    </p>
-<div class="active connection"></div>
-<div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee">
-<strong>Connection status</strong>:
+    <script src="scripts/rps.js"></script> 
+<body>    	
+    <p>Your ID is <span id="pid"></span><button id="copyId">Copy</button><button id="autoConnect">Auto Connect</button></p>
+    <p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else's id"><input class="button" type="button" value="Connect" id="connect"></p>
+    <div id="rps">
+    	<p>Make choice within: <span id="countdown"></span></p>
+	<p>Your Choice: <span id="myChoice"></span></p>
+        <p>Opponent Choice: <span id="oppChoice"></span></p>
+        <p>Result: <span id="result"></span></p>
+        <button id="rock">Rock</button>
+        <button id="paper">Paper</button>
+        <button id="scissors">Scissors</button>
+	<hr>
+	<button id="readyUp">Ready Up</button>
+    </div>
+    <div class="active connection"></div>
+    <div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee">
+    <strong>Connection status</strong>:
 <br>
 </div>
 </body>

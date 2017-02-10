@@ -1,3 +1,22 @@
+/*
+	Ready
+
+	Required to define own handleData(data) function to interact with data
+	If using countdown you need to define countdownComplete();
+*/
+$(document).ready(function() {
+    $('#connect').click(function() {
+    	createConnection("manualConnection");
+    });
+    $('#autoConnect').click(function() {
+    	attemptConnection();
+    });
+});
+
+/*
+	PeerJS required connection code
+*/
+
 var peer = new Peer({
   host : 'adb07.cs.appstate.edu',
   port : 9000,
@@ -14,6 +33,7 @@ var peer = new Peer({
     	$('.log').append(copy + '<br>');
   }
 });
+
 var connectedPeers = {};
 var connected = false;
 peer.on('open', function(id){
@@ -30,13 +50,39 @@ peer.on('error', function(err) {
 function connect(c) {
     $('#rid').val(c.peer);
     connected = true;
-   	c.on('data', function(data) {
+    c.on('data', function(data) {
        	$(".active").prepend(data + c.label + "<br>");
+	handleData(data);
    });
    connectedPeers[c.peer] = 1;
-   peer.disconnect(); // Still connected to its peer just cant accpet any other requets
-	// Can use reconnect to connect it back to the server allowing new connections.
+   //peer.disconnect(); // Still connected to its peer just cant accpet any other requets
+   // Can use reconnect to connect it back to the server allowing new connections.
 }
+
+function eachActiveConnection(fn) {
+    var checkedIds = {};
+    for (var peerId in connectedPeers) {
+        if (!checkedIds[peerId]) {
+            var conns = peer.connections[peerId];
+            for (var i = 0, ii = conns.length; i < ii; i += 1) {
+                var conn = conns[i];
+                fn(conn, $(this));
+            }
+        }
+        checkedIds[peerId] = 1;
+    }
+}
+
+
+window.onunload = window.onbeforeunload = function(e) {
+    if (!!peer && !peer.destroyed) {
+        peer.destroy();
+    }
+};
+
+/*
+	My helper functions for creating the connection.
+*/
 
 function createConnection(labelVal) {
 	var requestedPeer = $("#rid").val();
@@ -44,7 +90,6 @@ function createConnection(labelVal) {
 		var conn = peer.connect(requestedPeer, {label: labelVal});
 		conn.on('open', function() {
 			connected = true;
-			console.log("help");
 			connect(conn);
 			peer.disconnect(); // Still connected to its peer just cant accept any other requests
 		});
@@ -65,40 +110,18 @@ function autoConnection(res) {
 	return false;
 }
 
-function sleep(delay) {
-	var start = new Date().getTime();
-	while (new Date().getTime() < start + delay);
-}
-
 function attemptConnection() {
-	// Async Call
-	// possible solution http://stackoverflow.com/questions/20775958/broadcast-or-peer-discovery-with-peerjs 
-	peer.listAllPeers( function(res) {
-   		autoConnection(res);
-	});
+        // Async Call
+        // possible solution http://stackoverflow.com/questions/20775958/broadcast-or-peer-discovery-with-peerjs
+        peer.listAllPeers( function(res) {
+                autoConnection(res);
+        });
 }
 
-$(document).ready(function() {
-    $('#connect').click(function() {
- 		createConnection("manualConnection"); 
-	});
-    $('#autoConnect').click(function() {
-		var response = false;
-		var retryConnection = 10;
-		console.log("Trying connection...");
-		//while ( !response && retryConnection != 0 ) {
-		//	console.log("Looking for peer...");
-			attemptConnection();
-				
-		//	if (!connected) {
-		//		console.log("No peer found. Retrying connection in 5 seconds. Attempt " + (10 - retryConnection + 1) + "/10");
-		//		retryConnection -= 1;
-		//		sleep(500);
-		//	}
-		//	else { response = true; }
-		//} 
-	});
-});
+
+/*
+	Miscellaneous helper functions.
+*/
 
 $(document).keypress(function ( e) {
     eachActiveConnection(function(c,$c) {
@@ -106,23 +129,39 @@ $(document).keypress(function ( e) {
     });
 });
 
-function eachActiveConnection(fn) {
-    var checkedIds = {};
-    for (var peerId in connectedPeers) {
-        if (!checkedIds[peerId]) {
-            var conns = peer.connections[peerId];
-            for (var i = 0, ii = conns.length; i < ii; i += 1) {
-                var conn = conns[i];
-                fn(conn, $(this));
-            }
-        }
-        checkedIds[peerId] = 1;
-    }
+function sendData(data) {
+    eachActiveConnection(function(c,$c) {
+        c.send(data);
+    });
 }
 
-window.onunload = window.onbeforeunload = function(e) {
-    if (!!peer && !peer.destroyed) {
-        peer.destroy();
-    }
-};
+function sleep(delay) {
+	var start = new Date().getTime();
+	while (new Date().getTime() < start + delay);
+}
 
+function countdown() {
+    var w;
+    if (typeof(Worker) !== "undefined") {
+        if (typeof(w) == "undefined") {
+            w = new Worker("/scripts/counter.js");
+        }
+        w.onmessage = function(event) {
+            $("#countdown").html(event.data);
+            if (event.data == 0) {
+                stopWorker(w);
+                countdownComplete();
+            }
+        };
+
+    }
+    else {
+        $("#countdown").html("WW Error");
+    }
+
+}
+
+function stopWorker(w) {
+    w.terminate();
+    w = undefined;
+}
