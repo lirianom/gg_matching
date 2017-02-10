@@ -3,8 +3,13 @@ var app = express();
 var ExpressPeerServer = require('peer').ExpressPeerServer;
 
 app.get('/', function(req, res, next) {
-    console.log("")
+    console.log("");
     res.sendFile('/home/guigouma/capstone/split_match/pj/index.html');
+});
+
+app.get('/rps', function(req, res, next) {
+	console.log("rps");
+	res.sendFile('//home/guigouma/capstone/split_match/pj/games/rps.html');
 });
 
 var server = app.listen(9000);
