@@ -11,5 +11,8 @@
   "dependencies": {
     "express": "^4.14.1",
     "peerjs": "~0.3.14"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }

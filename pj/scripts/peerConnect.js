@@ -31,32 +31,56 @@ var peer = new Peer({
   	logFunction: function() {
   		var copy = Array.prototype.slice.call(arguments).join(' ');
     		$('.log').append(copy + '<br>');
-  	}
+  	},
 });
 
 var connectedPeers = {};
-var connected = false;
+
 peer.on('open', function(id){
   	$('#pid').val(id);
   	$('#pid').text(id);
 });
 
 // Await connections from others
-peer.on('connection', connect);
+peer.on('connection', function(c) { 
+	connect(c);
+});
+
 peer.on('error', function(err) {
   	console.log(err);
-})
+});
 
 function connect(c) {
-    $('#rid').val(c.peer);
-    connected = true;
+	setupConnection(c);
     c.on('data', function(data) {
-       	$(".active").prepend(data + c.label + "<br>");
-		handleData(data);
+		console.log(data);
+   	   	$(".active").prepend(data + c.label + "<br>");
+		if (data.hasOwnProperty('waitForTurn') && data.waitForTurn) {
+			handleTurnData(data);
+		}
+		else {
+			handleData(data);
+		}
    	});
+}
+
+function handleTurnData(data) {
+	if (!myTurn) {
+		myTurn = true;
+		console.log("MyTurn");
+		handleData(data);	
+	}
+}
+
+function initializeTurnGame(readyList) {
+	pidTurn = readyList[0];
+    if ($("#pid").val() == pidTurn) myTurn = true;
+}
+
+function setupConnection(c) {
+	$('#rid').val(c.peer);
 	connectedPeers[c.peer] = 1;
-    //peer.disconnect(); // Still connected to its peer just cant accpet any other requets
-   // Can use reconnect to connect it back to the server allowing new connections.
+    setTimeout(function() { peer.disconnect(); }, 100);
 }
 
 function eachActiveConnection(fn) {
@@ -87,14 +111,14 @@ window.onunload = window.onbeforeunload = function(e) {
 function createConnection(labelVal) {
 	var requestedPeer = $("#rid").val();
 	if (!connectedPeers[requestedPeer]) {
-		var conn = peer.connect(requestedPeer, {label: labelVal});
+		var conn = peer.connect(requestedPeer, {label: labelVal, metadata: window.location.href});
 		conn.on('open', function() {
-			connected = true;
 			connect(conn);
 			peer.disconnect(); // Still connected to its peer just cant accept any other requests
 		});
 		conn.on('error', function(err) { alert(err); });
 	}
+	
 	connectedPeers[requestedPeer] = 1;
 }
 
@@ -118,6 +142,17 @@ function attemptConnection() {
         });
 }
 
+function isConnectionValid(connectionSource) {
+	console.log(connectionSource);
+	console.log(window.location.href);
+	
+	return connectionSource == window.location.href;
+}
+
+function isConnected() {
+	// Might fail on disconnecting and reconnecting peers
+	return !($.isEmptyObject(connectedPeers));
+}
 
 /*
 	Miscellaneous helper functions.
@@ -144,7 +179,7 @@ function countdown() {
     var w;
     if (typeof(Worker) !== "undefined") {
         if (typeof(w) == "undefined") {
-            w = new Worker("/scripts/counter.js");
+            w = new Worker("pj/scripts/counter.js");
         }
         w.onmessage = function(event) {
             $("#countdown").html(event.data);
