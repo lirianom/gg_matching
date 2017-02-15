@@ -19,9 +19,10 @@ $(document).ready(function() {
 */
 
 gameList = {
-			"http://adb07.cs.appstate.edu:9000/ttt":"t",
+			"http://adb07.cs.appstate.edu:9000/oldttt":"ot",
 			"http://adb07.cs.appstate.edu:9000/rps":"r",
-			"http://adb07.cs.appstate.edu:9000/":"x"
+			"http://adb07.cs.appstate.edu:9000/":"x",
+			"http://adb07.cs.appstate.edu:9000/ttt":"t"
 			};
 
 function createPeerID() {

@@ -12,6 +12,11 @@ app.get('/rps', function(req, res, next) {
     res.sendFile('/home/guigouma/capstone/split_match/pj/games/rps.html');
 });
 
+app.get('/oldttt', function(req, res, next) {
+    console.log("oldttt");
+    res.sendFile('/home/guigouma/capstone/split_match/pj/games/oldttt.html');
+});
+
 app.get('/ttt', function(req, res, next) {
     console.log("ttt");
     res.sendFile('/home/guigouma/capstone/split_match/pj/games/ttt.html');
