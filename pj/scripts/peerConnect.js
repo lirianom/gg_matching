@@ -4,6 +4,7 @@
 	Required to define own handleData(data) function to interact with data
 	If using countdown you need to define countdownComplete();
 */
+
 $(document).ready(function() {
     $('#connect').click(function() {
     	createConnection("manualConnection");
@@ -14,10 +15,36 @@ $(document).ready(function() {
 });
 
 /*
-	PeerJS required connection code
+	Generate PeerID Helper Methods
 */
 
-var peer = new Peer({
+gameList = {
+			"http://adb07.cs.appstate.edu:9000/ttt":"t",
+			"http://adb07.cs.appstate.edu:9000/rps":"r",
+			"http://adb07.cs.appstate.edu:9000/":"x"
+			};
+
+function createPeerID() {
+    var s = [];
+    var hexDigits = "0123456789abcdef";
+    for (var i = 0; i < 14; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+    }
+	s[15] = "-" + gameList[window.location.href];
+    var peerID = s.join("");
+	console.log(peerID);
+    return peerID;
+}
+
+function getPeerIDSubset(peerID) {
+	return peerID.split("-")[1];
+}
+
+/*
+    PeerJS required connection code
+*/
+
+var peer = new Peer(createPeerID() ,{	
 	host : 'adb07.cs.appstate.edu',
   	port : 9000,
 	path : '/',
@@ -74,7 +101,7 @@ function handleTurnData(data) {
 
 function initializeTurnGame(readyList) {
 	pidTurn = readyList[0];
-    if ($("#pid").val() == pidTurn) myTurn = true;
+    if (peer.id == pidTurn) myTurn = true;
 }
 
 function setupConnection(c) {
@@ -108,10 +135,9 @@ window.onunload = window.onbeforeunload = function(e) {
 	My helper functions for creating the connection.
 */
 
-function createConnection(labelVal) {
-	var requestedPeer = $("#rid").val();
+function createConnection(labelVal, requestedPeer) {
 	if (!connectedPeers[requestedPeer]) {
-		var conn = peer.connect(requestedPeer, {label: labelVal, metadata: window.location.href});
+		var conn = peer.connect(requestedPeer, {label: labelVal});
 		conn.on('open', function() {
 			connect(conn);
 			peer.disconnect(); // Still connected to its peer just cant accept any other requests
@@ -122,10 +148,11 @@ function createConnection(labelVal) {
 	connectedPeers[requestedPeer] = 1;
 }
 
+// Not being used right now - replaced by getAllConnections
 function autoConnection(res) {	
 	for (var i = 0, ii = res.length; i < ii; i += 1) {
 		console.log(res[i]);
-		if (res[i] != $("#pid").val()) {
+		if (res[i] != peer.id) {
 			$("#rid").val(res[i]);
 			createConnection("autoConnection");
 			return true;
@@ -134,12 +161,39 @@ function autoConnection(res) {
 	return false;
 }
 
+function getAllConnections(res, listOfUsers) {
+	for (var i = 0, ii = res.length; i < ii; i += 1) {
+        if (res[i] != peer.id && getPeerIDSubset(peer.id) == getPeerIDSubset(res[i])) {
+            //$("#rid").val(res[i]);
+            //createConnection("autoConnection");
+			listOfUsers.push(res[i]); 
+        }
+    }  
+}
+
 function attemptConnection() {
         // Async Call
         // possible solution http://stackoverflow.com/questions/20775958/broadcast-or-peer-discovery-with-peerjs
+	// redo List all the peers everytime?
+		listOfUsers = [];
         peer.listAllPeers( function(res) {
-                autoConnection(res);
+                //autoConnection(res);
+				getAllConnections(res, listOfUsers);
+				tryConnection(listOfUsers);
         });
+		//wont work cause list all peers is async tryConnection(listOfUsers); 
+}
+
+function tryConnection(listOfUsers) {
+	var maximum = listOfUsers.length;
+	var minimum = 0;
+	var randomPeer = Math.floor(Math.random() * (maximum - minimum)) + minimum;
+	// need to pass as param
+	console.log(listOfUsers);
+	$("#rid").val(listOfUsers[randomPeer]);
+	// Handle this better in the future
+	if (listOfUsers.length == 0 ) console.log("Nothing to connect to.");
+	else createConnection("randomAutoConnection", listOfUsers[randomPeer]);
 }
 
 function isConnectionValid(connectionSource) {
