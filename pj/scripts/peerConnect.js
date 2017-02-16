@@ -5,6 +5,9 @@
 	If using countdown you need to define countdownComplete();
 */
 
+var readyList = []; // Might want to remove
+var globalGame; 
+
 $(document).ready(function() {
     $('#connect').click(function() {
     	createConnection("manualConnection");
@@ -15,7 +18,7 @@ $(document).ready(function() {
 });
 
 /*
-	Generate PeerID Helper Methods
+	Generate PeerId Helper Methods
 */
 
 gameList = {
@@ -25,27 +28,35 @@ gameList = {
 			"http://adb07.cs.appstate.edu:9000/ttt":"t"
 			};
 
-function createPeerID() {
+// When a peer disconnects their peer.id goes to the _lastServerId
+function getPeerId() {
+	if (peer.open) 
+		return peer.id;
+	else
+		return peer._lastServerId;
+}
+
+function createPeerId() {
     var s = [];
     var hexDigits = "0123456789abcdef";
     for (var i = 0; i < 14; i++) {
         s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
     }
 	s[15] = "-" + gameList[window.location.href];
-    var peerID = s.join("");
-	console.log(peerID);
-    return peerID;
+    var peerId = s.join("");
+	console.log(peerId);
+    return peerId;
 }
 
-function getPeerIDSubset(peerID) {
-	return peerID.split("-")[1];
+function getPeerIdSubset(peerId) {
+	return peerId.split("-")[1];
 }
 
 /*
     PeerJS required connection code
 */
 
-var peer = new Peer(createPeerID() ,{	
+var peer = new Peer(createPeerId() ,{	
 	host : 'adb07.cs.appstate.edu',
   	port : 9000,
 	path : '/',
@@ -83,6 +94,13 @@ function connect(c) {
     c.on('data', function(data) {
 		console.log(data);
    	   	$(".active").prepend(data + c.label + "<br>");
+		// Potentially combine with waitForTurn
+		if (data.hasOwnProperty('type') && data.type === "readyUp") {
+			var rid = $("#rid").val(); // Might want to change to get value not from page
+			readyList.push(rid);
+			readyList = $.unique(readyList);		
+			startGame(readyList);
+		}
 		if (data.hasOwnProperty('waitForTurn') && data.waitForTurn) {
 			handleTurnData(data);
 		}
@@ -92,23 +110,87 @@ function connect(c) {
    	});
 }
 
+
 function handleTurnData(data) {
-	if (!myTurn) {
-		myTurn = true;
+	//if (!myTurn) {
 		console.log("MyTurn");
 		handleData(data);	
-	}
+	//}
 }
 
-function initializeTurnGame(readyList) {
-	pidTurn = readyList[0];
-    if (peer.id == pidTurn) myTurn = true;
+function readyUp() {
+	$("#readyUp").on("click", function() {
+        pid = getPeerId();
+        readyList.push(pid);
+        readyList = $.unique(readyList);
+        sendData({"type":"readyUp"});//,"waitForTurn":true});
+		startGame(readyList);
+	});
+
+}
+
+function Game(readyList) { // Constructor
+    var player1;
+	var player2;
+	// for turn based 
+	var currentTurn;
+	this.setPlayer1(readyList[0]);
+	this.setPlayer2(readyList[1]);
+
+	this.initializeTurnGame(null); //eventually random pick first player
+}
+
+Game.prototype.test = function() {
+	console.log("test");
+}
+
+Game.prototype.initializeTurnGame = function(readyList) {
+	this.currentTurn = this.player1;
+}
+
+Game.prototype.setPlayer1 = function(id) {
+	this.player1 = id;
+	console.log("Player 1 = " + this.player1);
+}
+
+Game.prototype.setPlayer2 = function(id) {
+	this.player2 = id;
+	console.log("Player 2 = " + id);
+}
+
+Game.prototype.getPlayer1 = function() {
+	return this.player1;
+}
+
+Game.prototype.getPlayer2 = function() {
+	return this.player2;
+}
+
+Game.prototype.currentTurn = function() {
+	return currentTurn; 
+}
+
+Game.prototype.endTurn = function() {
+	if (this.currentTurn == this.player1) this.currentTurn = this.player2;
+	else this.currentTurn = this.player1;
+}
+
+function startGame(readyList) {
+    if (readyList.length == 2) {
+        globalGame = new Game(readyList);
+		game();
+    }
+}
+
+function getGame() {
+	if (globalGame == undefined) alert("Game Undefined");
+	return globalGame;
 }
 
 function setupConnection(c) {
 	$('#rid').val(c.peer);
 	connectedPeers[c.peer] = 1;
-    setTimeout(function() { peer.disconnect(); }, 100);
+    //setTimeout(function() { peer.disconnect(); }, 100);
 }
 
 function eachActiveConnection(fn) {
@@ -164,7 +246,7 @@ function autoConnection(res) {
 
 function getAllConnections(res, listOfUsers) {
 	for (var i = 0, ii = res.length; i < ii; i += 1) {
-        if (res[i] != peer.id && getPeerIDSubset(peer.id) == getPeerIDSubset(res[i])) {
+        if (res[i] != peer.id && getPeerIdSubset(peer.id) == getPeerIdSubset(res[i])) {
             //$("#rid").val(res[i]);
             //createConnection("autoConnection");
 			listOfUsers.push(res[i]); 
@@ -190,7 +272,7 @@ function tryConnection(listOfUsers) {
 	var minimum = 0;
 	var randomPeer = Math.floor(Math.random() * (maximum - minimum)) + minimum;
 	// need to pass as param
-	console.log(listOfUsers);
+	//console.log(listOfUsers);
 	$("#rid").val(listOfUsers[randomPeer]);
 	// Handle this better in the future
 	if (listOfUsers.length == 0 ) console.log("Nothing to connect to.");

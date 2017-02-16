@@ -9,17 +9,17 @@ app.get('/', function(req, res, next) {
 
 app.get('/rps', function(req, res, next) {
     console.log("rps");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/games/rps.html');
+    res.sendFile('/home/guigouma/capstone/split_match/pj/games/rps/rps.html');
 });
 
 app.get('/oldttt', function(req, res, next) {
     console.log("oldttt");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/games/oldttt.html');
+    res.sendFile('/home/guigouma/capstone/split_match/pj/games/oldttt/oldttt.html');
 });
 
 app.get('/ttt', function(req, res, next) {
     console.log("ttt");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/games/ttt.html');
+    res.sendFile('/home/guigouma/capstone/split_match/pj/games/ttt/ttt.html');
 });
 
 var server = app.listen(9000);
