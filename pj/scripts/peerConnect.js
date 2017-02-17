@@ -140,7 +140,7 @@ function Game(readyList) { // Constructor
 	this.setPlayer1(readyList[0]);
 	this.setPlayer2(readyList[1]);
 
-	this.initializeTurnGame(null); //eventually random pick first player
+	//this.initializeTurnGame(null); //eventually random pick first player
 }
 
 Game.prototype.test = function() {
@@ -179,10 +179,10 @@ Game.prototype.endTurn = function() {
 	else this.currentTurn = this.player1;
 }
 
-Game.prototpe.movesAllowed = function() {
+Game.prototype.movesAllowed = function() {
 	// If turn based game allow moves?
 	if (this.turnBased) {
-		return this.currentTurn() == getPeerId();  
+		return this.currentTurn == getPeerId();  
 	}
 	else {
 		return this.allowMoves;

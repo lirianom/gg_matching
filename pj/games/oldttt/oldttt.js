@@ -22,13 +22,16 @@ function handleData(data) {
     }
 }
 
+function game() {	
+	getGame().initializeTurnGame(readyList);
+	moves();
+
+}
+
 /*
-	Game specific functions
+	Game Specific functions
 */
 
-function game() {	
-	moves();
-}
 
 function determineVictory() {
 

@@ -1,7 +1,12 @@
-window.onload = start;
+window.onload = init;
 
 var i = setInterval(updateWinner, 20);
 var didMove = false;
+
+function init() {
+    readyUp();
+    start();
+}
 
 function start() {
     var sqr1 = document.getElementById("sqr1");

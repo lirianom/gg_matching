@@ -1,8 +1,7 @@
 /*
 	READY
 */
-
-allowMoves = false;
+var myMove;
 
 $(document).ready(function() {
 	readyUp();
@@ -21,7 +20,7 @@ function handleData(data) {
 function countdownComplete() {
     $("#oppChoice").html(oppChoice);
     determineVictory();
-    allowMoves = false;
+    getGame().setAllowMoves(false);
 }
 
 /*
@@ -46,9 +45,8 @@ function determineVictory() {
 }
 
 function moves() {
-	
 	$("#rock").on("click", function() {
-		if (allowMoves) {
+		if (getGame().movesAllowed()) {
 			sendData({"type":"rps","choice":"Rock"});
 			myMove = "Rock";
 			$("#myChoice").html("Rock");
@@ -56,7 +54,7 @@ function moves() {
 	});
 
 	$("#paper").on("click", function() {
-		if (allowMoves) {
+		if (getGame().movesAllowed()) {
 			sendData({"type":"rps","choice":"Paper"});
 			myMove = "Paper";
 			$("#myChoice").html("Paper");
@@ -64,7 +62,7 @@ function moves() {
 	});
 
 	$("#scissors").on("click", function() {
-		if (allowMoves) {
+		if (getGame().movesAllowed()) {
 			sendData({"type":"rps","choice":"Scissors"});
 			myMove = "Scissors";
 			$("#myChoice").html("Scissors")
@@ -72,4 +70,5 @@ function moves() {
 	});
 
 }
+
 
