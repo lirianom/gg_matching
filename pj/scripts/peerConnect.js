@@ -134,6 +134,9 @@ function Game(readyList) { // Constructor
 	var player2;
 	// for turn based 
 	var currentTurn;
+
+	var turnBased = false;
+	var allowMoves = false;
 	this.setPlayer1(readyList[0]);
 	this.setPlayer2(readyList[1]);
 
@@ -146,6 +149,7 @@ Game.prototype.test = function() {
 
 Game.prototype.initializeTurnGame = function(readyList) {
 	this.currentTurn = this.player1;
+	this.turnBased = true;
 }
 
 Game.prototype.setPlayer1 = function(id) {
@@ -173,6 +177,20 @@ Game.prototype.currentTurn = function() {
 Game.prototype.endTurn = function() {
 	if (this.currentTurn == this.player1) this.currentTurn = this.player2;
 	else this.currentTurn = this.player1;
+}
+
+Game.prototpe.movesAllowed = function() {
+	// If turn based game allow moves?
+	if (this.turnBased) {
+		return this.currentTurn() == getPeerId();  
+	}
+	else {
+		return this.allowMoves;
+	}
+}
+
+Game.prototype.setAllowMoves = function(val) {
+	this.allowMoves = val;
 }
 
 function startGame(readyList) {

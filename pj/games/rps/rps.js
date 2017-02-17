@@ -1,19 +1,11 @@
-allowMoves = false;
-readyList = [];
-
 /*
 	READY
 */
 
-$(document).ready(function() {
-	$("#readyUp").on("click", function() {
-		pid = $("#pid").val();
-		readyList.push(pid);
-		readyList = $.unique(readyList);
-		sendData({"type":"readyUp"});
-		game();
-	});
+allowMoves = false;
 
+$(document).ready(function() {
+	readyUp();
 });
 
 /*
@@ -23,12 +15,6 @@ $(document).ready(function() {
 function handleData(data) {
     if (data.type == "rps") {
         oppChoice = data.choice;
-    }
-    if (data.type == "readyUp") {
-        rid = $("#rid").val();
-        readyList.push(rid);
-        readyList = $.unique(readyList);
-        game();
     }
 }
 
@@ -44,15 +30,12 @@ function countdownComplete() {
 
 function game() {
 	console.log(readyList);
-	if (readyList.length == 2) {
-		allowMoves = true;
-		moves();
-		countdown();
-	}
+	getGame().setAllowMoves(true);
+	moves();
+	countdown();
 }
 
-function determineVictory() {
-	
+function determineVictory() {	
 	if (myMove == oppChoice) { $("#result").html("T"); }
 	else if (myMove == "Paper" && oppChoice == "Rock") $("#result").html("W");
 	else if (myMove == "Paper" && oppChoice == "Scissors") $("#result").html("L");
