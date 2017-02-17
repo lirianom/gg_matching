@@ -8,13 +8,38 @@
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
     <script src="pj/scripts/peerConnect.js"></script>
     <script src="pj/scripts/copyToClip.js"></script>
-    <script src="pj/scripts/ttt.js"></script> 
+    <script src="pj/games/ttt/ttt.js"></script> 
+	<link rel="stylesheet" href="pj/games/ttt/tictactoe.css">
 <body>    	
     <p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>
     <p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else's id"><input class="button" type="button" value="Connect" id="connect"></p>
     <div id="ttt">
 		<button id="readyUp">Ready Up</button>
     </div>
+
+    <table>
+        <tr>
+            <td><canvas id = "sqr1" class = "row1"></canvas></td>
+            <td><canvas id = "sqr2" class = "row1"></canvas></td>
+            <td><canvas id = "sqr3" class = "row1"></canvas></td>
+        </tr>    
+        
+        <tr>
+            <td><canvas id = "sqr4" class = "row2"></canvas></td>
+            <td><canvas id = "sqr5" class = "row2"></canvas></td>
+            <td><canvas id = "sqr6" class = "row2"></canvas></td>
+        </tr>    
+        
+        <tr>
+            <td><canvas id = "sqr7" class = "row3"></canvas></td>
+            <td><canvas id = "sqr8" class = "row3"></canvas></td>
+            <td><canvas id = "sqr9" class = "row3"></canvas></td>
+        </tr>
+        <tr>
+            <td><canvas id = "blank"></canvas>
+        </tr>    
+	</table>
+
     <div class="active connection"></div>
     <div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee">
     	<strong>Connection status</strong>:

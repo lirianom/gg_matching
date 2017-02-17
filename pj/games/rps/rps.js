@@ -59,11 +59,7 @@ function determineVictory() {
 	else if (myMove == "Rock" && oppChoice == "Paper") $("#result").html("L");
    	else if (myMove == "Rock" && oppChoice == "Scissors") $("#result").html("W");
    	else if (myMove == "Scissors" && oppChoice == "Rock") $("#result").html("L");
-    else if (myMove == "Scissors" && oppChoice == "Paper") $("#result").html("W");
-
-
-
-
+	else if (myMove == "Scissors" && oppChoice == "Paper") $("#result").html("W");
 }
 
 function moves() {
