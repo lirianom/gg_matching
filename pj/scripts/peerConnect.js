@@ -110,6 +110,26 @@ function connect(c) {
    	});
 }
 
+// Maybe setting functions can be done with the abstract game
+var handleData = function () { throw new Error("handleData(data) is not defined use defineHandleData(func)"); } 
+function defineHandleData(func) {
+	if (func !== 'undefined' && typeof func === 'function') {
+		handleData = func;
+	}
+	else {
+		throw new Error("defineHandleData(func) takes a function as a parameter not " + typeof func);
+	}
+}
+
+var countdownComplete = function () { throw new Error("countdownComplete() is not defined use defineCountdownComplete(func)"); }
+function defineCountdownComplete(func) {
+	if (func !== 'undefined' && typeof func === 'function') {
+        countdownComplete = func;
+    }
+	else {
+		throw new Error("defineCountdownComplete(func) takes a function as a parameter not " + typeof func);
+	}
+}
 
 function handleTurnData(data) {
 	//if (!myTurn) {
@@ -126,7 +146,6 @@ function readyUp() {
         sendData({"type":"readyUp"});//,"waitForTurn":true});
 		startGame(readyList);
 	});
-
 }
 
 function startGame(readyList) {
@@ -137,14 +156,14 @@ function startGame(readyList) {
 }
 
 function getGame() {
-	if (globalGame == undefined) alert("Game Undefined");
+	if (globalGame == undefined) { throw new Error("Game has not been defined yet. Game gets created when both players readyUp.");  }
 	return globalGame;
 }
 
 function setupConnection(c) {
 	$('#rid').val(c.peer);
 	connectedPeers[c.peer] = 1;
-    //setTimeout(function() { peer.disconnect(); }, 100);
+    setTimeout(function() { peer.disconnect(); }, 100);
 }
 
 function eachActiveConnection(fn) {
@@ -198,36 +217,28 @@ function autoConnection(res) {
 	return false;
 }
 
-function getAllConnections(res, listOfUsers) {
+function getAllConnections(res) {
+	var listOfUsers = [];
 	for (var i = 0, ii = res.length; i < ii; i += 1) {
         if (res[i] != peer.id && getPeerIdSubset(peer.id) == getPeerIdSubset(res[i])) {
-            //$("#rid").val(res[i]);
-            //createConnection("autoConnection");
 			listOfUsers.push(res[i]); 
         }
-    }  
+    } 
+	return listOfUsers;
 }
 
 function attemptConnection() {
         // Async Call
-        // possible solution http://stackoverflow.com/questions/20775958/broadcast-or-peer-discovery-with-peerjs
-	// redo List all the peers everytime?
-		listOfUsers = [];
         peer.listAllPeers( function(res) {
-                //autoConnection(res);
-				getAllConnections(res, listOfUsers);
+				var listOfUsers = getAllConnections(res);
 				tryConnection(listOfUsers);
         });
-		//wont work cause list all peers is async tryConnection(listOfUsers); 
 }
 
 function tryConnection(listOfUsers) {
 	var maximum = listOfUsers.length;
 	var minimum = 0;
 	var randomPeer = Math.floor(Math.random() * (maximum - minimum)) + minimum;
-	// need to pass as param
-	//console.log(listOfUsers);
-	$("#rid").val(listOfUsers[randomPeer]);
 	// Handle this better in the future
 	if (listOfUsers.length == 0 ) console.log("Nothing to connect to.");
 	else createConnection("randomAutoConnection", listOfUsers[randomPeer]);

@@ -5,6 +5,8 @@ var myMove;
 
 $(document).ready(function() {
 	readyUp();
+	defineHandleData(handleData);
+	defineCountdownComplete(countdownComplete);
 });
 
 /*

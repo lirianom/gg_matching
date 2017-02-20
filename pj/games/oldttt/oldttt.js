@@ -6,6 +6,7 @@ allowMoves = false;
 
 $(document).ready(function() {
 	readyUp(); // to set Ready up button not sure best location fro this yet
+	defineHandleData(recieveData);
 });
 
 
@@ -13,7 +14,7 @@ $(document).ready(function() {
 	Required functions for peerConnections.js
 */
 count = 0;
-function handleData(data) {	
+function recieveData(data) {	
 	// Method is run by client that recieves the data.
     if (data.type == "oldttt") {
 		console.log("Turn: " + count);
@@ -23,7 +24,7 @@ function handleData(data) {
 }
 
 function game() {	
-	getGame().initializeTurnGame(readyList);
+	getGame().initializeTurnGame();
 	moves();
 
 }

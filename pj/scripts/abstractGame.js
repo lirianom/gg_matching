@@ -1,22 +1,21 @@
 function Game(readyList) { // Constructor
     var player1;
     var player2;
-    // for turn based
-    var currentTurn;
+    
+	var currentTurn;
 
     var turnBased = false;
     var allowMoves = false;
     this.setPlayer1(readyList[0]);
     this.setPlayer2(readyList[1]);
 
-    //this.initializeTurnGame(null); //eventually random pick first player
 }
 
 Game.prototype.test = function() {
     console.log("test");
 }
 
-Game.prototype.initializeTurnGame = function(readyList) {
+Game.prototype.initializeTurnGame = function() {
     this.currentTurn = this.player1;
     this.turnBased = true;
 }
@@ -59,7 +58,8 @@ Game.prototype.movesAllowed = function() {
 }
 
 Game.prototype.setAllowMoves = function(val) {
-    this.allowMoves = val;
+    if (typeof val != 'boolean') { throw new Error("setAllowMoves(boolean v) takes a boolean as a parameter not " + typeof val); }
+	this.allowMoves = val;
 }
 
 
