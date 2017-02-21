@@ -4,9 +4,10 @@
 var myMove;
 
 $(document).ready(function() {
-	readyUp();
-	defineHandleData(handleData);
-	defineCountdownComplete(countdownComplete);
+	Framework.readyUp();
+	Framework.defineHandleData(handleData);
+	Framework.defineCountdownComplete(countdownComplete);
+	Framework.defineGame(game);
 });
 
 /*
@@ -22,7 +23,7 @@ function handleData(data) {
 function countdownComplete() {
     $("#oppChoice").html(oppChoice);
     determineVictory();
-    getGame().setAllowMoves(false);
+    Framework.getGame().setAllowMoves(false);
 }
 
 /*
@@ -30,10 +31,9 @@ function countdownComplete() {
 */
 
 function game() {
-	console.log(readyList);
-	getGame().setAllowMoves(true);
+	Framework.getGame().setAllowMoves(true);
 	moves();
-	countdown();
+	Framework.countdown();
 }
 
 function determineVictory() {	
@@ -48,24 +48,24 @@ function determineVictory() {
 
 function moves() {
 	$("#rock").on("click", function() {
-		if (getGame().movesAllowed()) {
-			sendData({"type":"rps","choice":"Rock"});
+		if (Framework.getGame().movesAllowed()) {
+			Framework.sendData({"type":"rps","choice":"Rock"});
 			myMove = "Rock";
 			$("#myChoice").html("Rock");
 		}
 	});
 
 	$("#paper").on("click", function() {
-		if (getGame().movesAllowed()) {
-			sendData({"type":"rps","choice":"Paper"});
+		if (Framework.getGame().movesAllowed()) {
+			Framework.sendData({"type":"rps","choice":"Paper"});
 			myMove = "Paper";
 			$("#myChoice").html("Paper");
 		}
 	});
 
 	$("#scissors").on("click", function() {
-		if (getGame().movesAllowed()) {
-			sendData({"type":"rps","choice":"Scissors"});
+		if (Framework.getGame().movesAllowed()) {
+			Framework.sendData({"type":"rps","choice":"Scissors"});
 			myMove = "Scissors";
 			$("#myChoice").html("Scissors")
 		}

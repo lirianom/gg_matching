@@ -54,13 +54,13 @@ Framework.defineCountdownComplete = function(func) {
     }
 }
 
-var game = function() { throw new Error("game() is not defined use definedGame(func)"); }
+var game = function() { throw new Error("game() is not defined use defineGame(func)"); }
 Framework.defineGame = function(func) {
     if (func !== 'undefined' && typeof func === 'function') {
         game = func;
     }
     else {
-        throw new Error("defineCountdownComplete(func) takes a function as a parameter not " + typeof func);
+        throw new Error("defineGame(func) takes a function as a parameter not " + typeof func);
     }
 
 }
@@ -132,6 +132,7 @@ Framework.countdown = function() {
 /*
 	Private functions only can be called internally
 */
+
 function createPeerId() {
     var s = [];
     var hexDigits = "0123456789abcdef";
