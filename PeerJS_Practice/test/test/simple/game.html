@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>Capstone</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="en-us">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+    <script src="../dist/peer.js"></script>
+    <script src="peerConnect.js"></script>
+    <script src="readInput.js"></script>
+    <script src="copyToClip.js"></script>
+<body>
+    <p>
+        Your ID is <span id="pid"></span>
+        <button id="copyId">Copy</button>
+    </p>
+    <p>
+        Connect to a peer: 
+        <input type="text" id="rid" placeholder="Someone else's id"><input class="button" type="button" value="Connect" id="connect">
+    </p>
+<div class="active connection"></div>
+<div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee">
+<strong>Connection status</strong>:
+<br>
+</div>
+</body>
+</html>
