@@ -4,11 +4,29 @@ var i = setInterval(updateWinner, 20);
 var didMove = false;
 
 function init() {
-    readyUp();
-    start();
+    Framework.readyUp();
+    Framework.defineHandleData(receiveData);
+    Framework.defineGame(game);
 }
 
-function start() {
+var count = 0;
+function receiveData(data) {
+    if (data.type == "ttt") {
+        console.log("Turn: " + count);
+	count += 1;
+	var c = document.getElementById(data.changedSqr).getContext("2d");
+	c.font = "70px Georgia";
+	c.fillText(data.changedSign, 100, 100); 
+	Framework.getGame().endTurn();
+    }
+}
+
+function game() {
+    Framework.getGame().initializeTurnGame();
+    ttt();
+}
+
+function ttt() {
     var sqr1 = document.getElementById("sqr1");
     var sqr2 = document.getElementById("sqr2");
     var sqr3 = document.getElementById("sqr3");
@@ -19,12 +37,13 @@ function start() {
     var sqr8 = document.getElementById("sqr8");
     var sqr9 = document.getElementById("sqr9");
 
-    var player = true;    
+    var player = Framework.getGame().getPlayer1();    
 
     sqr1.addEventListener('click', function() {
         if (sqr1.toDataURL() == document.getElementById("blank").toDataURL()) {
             mark(player, sqr1);
-            player = !player;
+            player = Framework.getGame().nextPlayer();
+	    Framework.getGame().endTurn();
         }
 
     }, false);
@@ -89,13 +108,19 @@ function start() {
          
 }
 
+var changedSqr = null;
+var changedSign = null;
+
 function mark(player, sqr) {
+    changedSqr = sqr.getAttribute('id');
     var ctx = sqr.getContext("2d");
     ctx.font = "70px Georgia";
-    if (player) {
-        ctx.fillText("X", 100 , 100);    
+    if (player == Framework.getGame().getPlayer1()) {
+        ctx.fillText("X", 100 , 100);
+	changedSign = "X";    
     } else {
         ctx.fillText("O", 100, 100);
+	changedSign = "O";
     }
     didMove = true;
      
@@ -103,9 +128,15 @@ function mark(player, sqr) {
 
 function updateWinner(player) {
     if (didMove) {
-        moves();
-        //sendData({"type":"ttt","waitForTurn":true,"turnComplete":true});
+        Framework.sendData({
+		"type":"ttt",
+		"waitForTurn":true,
+		"turnComplete":true,
+		"changedSqr":changedSqr,
+		"changedSign":changedSign
+	});
         didMove = false;
+	Framework.getGame().endTurn();
     }
     if (sqr1.toDataURL() == sqr2.toDataURL() && sqr1.toDataURL() == sqr3.toDataURL()
         && sqr1.toDataURL() != document.getElementById("blank").toDataURL()) {

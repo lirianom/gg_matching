@@ -11,10 +11,6 @@ function Game(readyList) { // Constructor
 
 }
 
-Game.prototype.test = function() {
-    console.log("test");
-}
-
 Game.prototype.initializeTurnGame = function() {
     this.currentTurn = this.player1;
     this.turnBased = true;
@@ -40,6 +36,11 @@ Game.prototype.getPlayer2 = function() {
 
 Game.prototype.currentTurn = function() {
     return currentTurn;
+}
+
+Game.prototype.nextPlayer = function() {
+	if (this.currentTurn == this.player1) return this.player2;
+	else return this.player1;
 }
 
 Game.prototype.endTurn = function() {

@@ -4,38 +4,134 @@
 	Required to define own handleData(data) function to interact with data
 	If using countdown you need to define countdownComplete();
 */
-
-var readyList = []; // Might want to remove
-var globalGame; 
-
 $(document).ready(function() {
-    $('#connect').click(function() {
-    	createConnection("manualConnection");
+	Framework.initializeButtons();	
+});
+
+(function(window) {
+
+'use strict';
+
+function defineFramework() {
+
+var Framework = {};
+
+/*
+	Fields
+*/
+var readyList = [];
+var globalGame; 
+var gameList = {
+            "http://adb07.cs.appstate.edu:9000/oldttt":"ot",
+            "http://adb07.cs.appstate.edu:9000/rps":"r",
+            "http://adb07.cs.appstate.edu:9000/":"x",
+            "http://adb07.cs.appstate.edu:9000/ttt":"t"
+            };
+var connectedPeers = {};
+
+/*
+	Public functions can call by using Framework.XXXX
+*/
+
+// Maybe setting functions can be done with the abstract game
+var handleData = function () { throw new Error("handleData(data) is not defined use defineHandleData(func)"); }
+Framework.defineHandleData = function(func) {
+    if (func !== 'undefined' && typeof func === 'function') {
+        handleData = func;
+    }
+    else {
+        throw new Error("defineHandleData(func) takes a function as a parameter not " + typeof func);
+    }
+}
+
+var countdownComplete = function () { throw new Error("countdownComplete() is not defined use defineCountdownComplete(func)"); }
+Framework.defineCountdownComplete = function(func) {
+    if (func !== 'undefined' && typeof func === 'function') {
+        countdownComplete = func;
+    }
+    else {
+        throw new Error("defineCountdownComplete(func) takes a function as a parameter not " + typeof func);
+    }
+}
+
+var game = function() { throw new Error("game() is not defined use definedGame(func)"); }
+Framework.defineGame = function(func) {
+    if (func !== 'undefined' && typeof func === 'function') {
+        game = func;
+    }
+    else {
+        throw new Error("defineCountdownComplete(func) takes a function as a parameter not " + typeof func);
+    }
+
+}
+
+Framework.readyUp = function() {
+    $("#readyUp").on("click", function() {
+        var pid = Framework.getPeerId();
+        readyList.push(pid);
+        readyList = $.unique(readyList);
+        Framework.sendData({"type":"readyUp"});//,"waitForTurn":true});
+        startGame(readyList);
+    });
+}
+
+Framework.getGame = function() {
+    if (globalGame == undefined) { throw new Error("Game has not been defined yet. Game gets created when both players readyUp."); }
+    return globalGame;
+}
+
+Framework.initializeButtons = function() {
+	$('#connect').click(function() {
+    	createConnection("manualConnection",$("#rid").val());
     });
     $('#autoConnect').click(function() {
     	attemptConnection();
     });
-});
 
-/*
-	Generate PeerId Helper Methods
-*/
+}
 
-gameList = {
-			"http://adb07.cs.appstate.edu:9000/oldttt":"ot",
-			"http://adb07.cs.appstate.edu:9000/rps":"r",
-			"http://adb07.cs.appstate.edu:9000/":"x",
-			"http://adb07.cs.appstate.edu:9000/ttt":"t"
-			};
-
-// When a peer disconnects their peer.id goes to the _lastServerId
-function getPeerId() {
+Framework.getPeerId = function() {
 	if (peer.open) 
 		return peer.id;
 	else
 		return peer._lastServerId;
 }
 
+Framework.sendData = function(data) {
+    eachActiveConnection(function(c,$c) {
+        c.send(data);
+    });
+}
+
+Framework.sleep = function(delay) {
+    var start = new Date().getTime();
+    while (new Date().getTime() < start + delay);
+}
+
+Framework.countdown = function() {
+    var w;
+    if (typeof(Worker) !== "undefined") {
+        if (typeof(w) == "undefined") {
+            w = new Worker("pj/scripts/counter.js");
+        }
+        w.onmessage = function(event) {
+            $("#countdown").html(event.data);
+            if (event.data == 0) {
+                stopWorker(w);
+                countdownComplete();
+            }
+        };
+
+    }
+    else {
+        $("#countdown").html("WW Error");
+    }
+
+}
+
+/*
+	Private functions only can be called internally
+*/
 function createPeerId() {
     var s = [];
     var hexDigits = "0123456789abcdef";
@@ -52,9 +148,6 @@ function getPeerIdSubset(peerId) {
 	return peerId.split("-")[1];
 }
 
-/*
-    PeerJS required connection code
-*/
 
 var peer = new Peer(createPeerId() ,{	
 	host : 'adb07.cs.appstate.edu',
@@ -73,8 +166,6 @@ var peer = new Peer(createPeerId() ,{
   	},
 });
 
-var connectedPeers = {};
-
 peer.on('open', function(id){
   	$('#pid').val(id);
   	$('#pid').text(id);
@@ -92,43 +183,26 @@ peer.on('error', function(err) {
 function connect(c) {
 	setupConnection(c);
     c.on('data', function(data) {
-		console.log(data);
-   	   	$(".active").prepend(data + c.label + "<br>");
-		// Potentially combine with waitForTurn
-		if (data.hasOwnProperty('type') && data.type === "readyUp") {
-			var rid = $("#rid").val(); // Might want to change to get value not from page
-			readyList.push(rid);
-			readyList = $.unique(readyList);		
-			startGame(readyList);
-		}
-		if (data.hasOwnProperty('waitForTurn') && data.waitForTurn) {
-			handleTurnData(data);
-		}
-		else {
-			handleData(data);
-		}
+		onData(c,data);
    	});
 }
 
-// Maybe setting functions can be done with the abstract game
-var handleData = function () { throw new Error("handleData(data) is not defined use defineHandleData(func)"); } 
-function defineHandleData(func) {
-	if (func !== 'undefined' && typeof func === 'function') {
-		handleData = func;
-	}
-	else {
-		throw new Error("defineHandleData(func) takes a function as a parameter not " + typeof func);
-	}
-}
-
-var countdownComplete = function () { throw new Error("countdownComplete() is not defined use defineCountdownComplete(func)"); }
-function defineCountdownComplete(func) {
-	if (func !== 'undefined' && typeof func === 'function') {
-        countdownComplete = func;
-    }
-	else {
-		throw new Error("defineCountdownComplete(func) takes a function as a parameter not " + typeof func);
-	}
+function onData(c,data) {
+		console.log(data);
+        $(".active").prepend(data + c.label + "<br>");
+        // Potentially combine with waitForTurn
+        if (data.hasOwnProperty('type') && data.type === "readyUp") {
+            var rid = $("#rid").val(); // Might want to change to get value not from page
+            readyList.push(rid);
+            readyList = $.unique(readyList);
+            startGame(readyList);
+        }
+        if (data.hasOwnProperty('waitForTurn') && data.waitForTurn) {
+            handleTurnData(data);
+        }
+        else {
+            handleData(data);
+        }
 }
 
 function handleTurnData(data) {
@@ -138,26 +212,11 @@ function handleTurnData(data) {
 	//}
 }
 
-function readyUp() {
-	$("#readyUp").on("click", function() {
-        pid = getPeerId();
-        readyList.push(pid);
-        readyList = $.unique(readyList);
-        sendData({"type":"readyUp"});//,"waitForTurn":true});
-		startGame(readyList);
-	});
-}
-
 function startGame(readyList) {
     if (readyList.length == 2) {
         globalGame = new Game(readyList);
         game();
     }
-}
-
-function getGame() {
-	if (globalGame == undefined) { throw new Error("Game has not been defined yet. Game gets created when both players readyUp.");  }
-	return globalGame;
 }
 
 function setupConnection(c) {
@@ -180,17 +239,9 @@ function eachActiveConnection(fn) {
     }
 }
 
-
-window.onunload = window.onbeforeunload = function(e) {
-	if (!!peer && !peer.destroyed) {
-        peer.destroy();
-    }
-};
-
 /*
-	My helper functions for creating the connection.
+	Helper function for creating connection
 */
-
 function createConnection(labelVal, requestedPeer) {
 	if (!connectedPeers[requestedPeer]) {
 		var conn = peer.connect(requestedPeer, {label: labelVal});
@@ -228,11 +279,11 @@ function getAllConnections(res) {
 }
 
 function attemptConnection() {
-        // Async Call
-        peer.listAllPeers( function(res) {
-				var listOfUsers = getAllConnections(res);
-				tryConnection(listOfUsers);
-        });
+    // Async Call
+    peer.listAllPeers( function(res) {
+		var listOfUsers = getAllConnections(res);
+		tryConnection(listOfUsers);
+	});
 }
 
 function tryConnection(listOfUsers) {
@@ -244,61 +295,40 @@ function tryConnection(listOfUsers) {
 	else createConnection("randomAutoConnection", listOfUsers[randomPeer]);
 }
 
-function isConnectionValid(connectionSource) {
-	console.log(connectionSource);
-	console.log(window.location.href);
-	
-	return connectionSource == window.location.href;
-}
-
 function isConnected() {
 	// Might fail on disconnecting and reconnecting peers
 	return !($.isEmptyObject(connectedPeers));
 }
 
-/*
-	Miscellaneous helper functions.
-*/
-
+// Temp function to test connection
 $(document).keypress(function ( e) {
     eachActiveConnection(function(c,$c) {
         c.send(e.keyCode);
     });
 });
 
-function sendData(data) {
-    eachActiveConnection(function(c,$c) {
-        c.send(data);
-    });
-}
-
-function sleep(delay) {
-	var start = new Date().getTime();
-	while (new Date().getTime() < start + delay);
-}
-
-function countdown() {
-    var w;
-    if (typeof(Worker) !== "undefined") {
-        if (typeof(w) == "undefined") {
-            w = new Worker("pj/scripts/counter.js");
-        }
-        w.onmessage = function(event) {
-            $("#countdown").html(event.data);
-            if (event.data == 0) {
-                stopWorker(w);
-                countdownComplete();
-            }
-        };
-
+window.onunload = window.onbeforeunload = function(e) {
+    if (!!peer && !peer.destroyed) {
+        peer.destroy();
     }
-    else {
-        $("#countdown").html("WW Error");
-    }
-
-}
+};
 
 function stopWorker(w) {
     w.terminate();
     w = undefined;
 }
+
+	return Framework;
+}
+
+if (typeof(Framework) === 'undefined') {
+	window.Framework = defineFramework();
+}
+else {
+	console.log("Framework already defined");
+}
+
+})(window);
+
+
+

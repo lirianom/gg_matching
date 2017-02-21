@@ -5,8 +5,9 @@ allowMoves = false;
 */
 
 $(document).ready(function() {
-	readyUp(); // to set Ready up button not sure best location fro this yet
-	defineHandleData(recieveData);
+	Framework.readyUp(); // to set Ready up button not sure best location fro this yet
+	Framework.defineHandleData(recieveData);
+	Framework.defineGame(game);
 });
 
 
@@ -19,12 +20,12 @@ function recieveData(data) {
     if (data.type == "oldttt") {
 		console.log("Turn: " + count);
 		count += 1;
-		getGame().endTurn();
+		Framework.getGame().endTurn();
     }
 }
 
 function game() {	
-	getGame().initializeTurnGame();
+	Framework.getGame().initializeTurnGame();
 	moves();
 
 }
@@ -41,11 +42,10 @@ function determineVictory() {
 
 function moves() {
 	count = 0;
-	console.log(getGame());
 	$(document).on("click", function() {
-		if (getGame().currentTurn == getPeerId()) {
-			getGame().endTurn();					
-			sendData({"type":"oldttt","waitForTurn":true,"turnComplete":true});
+		if (Framework.getGame().currentTurn == Framework.getPeerId()) {
+			Framework.getGame().endTurn();					
+			Framework.sendData({"type":"oldttt","waitForTurn":true,"turnComplete":true});
 		}
 	});
 }
