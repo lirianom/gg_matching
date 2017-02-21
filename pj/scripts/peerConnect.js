@@ -65,6 +65,25 @@ Framework.defineGame = function(func) {
 
 }
 
+var endGameCleanUp = function() { throw new Error("endGameCleanUp() is not defined use defineEndGameCleanUp(func)"); }
+Framework.defineEndGameCleanUp = function(func) {
+    if (func !== 'undefined' && typeof func === 'function') {
+        endGameCleanUp = func;
+    }
+    else {
+        throw new Error("defineEndGameCleanUp(func) takes a function as a parameter not " + typeof func);
+    }
+
+}
+
+Framework.endGameCleanUp = function() {
+	endGameCleanUp();
+}
+
+// public end game cleanup
+//Framework.endGameCleanUp = endGameCleanUp;
+
+
 Framework.readyUp = function() {
     $("#readyUp").on("click", function() {
         var pid = Framework.getPeerId();
@@ -198,12 +217,21 @@ function onData(c,data) {
             readyList = $.unique(readyList);
             startGame(readyList);
         }
-        if (data.hasOwnProperty('waitForTurn') && data.waitForTurn) {
-            handleTurnData(data);
-        }
-        else {
+        if (data.hasOwnProperty('type') && data.type == "gameInfo") {
+            handleGameInfoData(data);
+		}
+       	else {
             handleData(data);
         }
+}
+
+function handleGameInfoData(data) {
+	if (data.endTurn) {
+		Framework.getGame()._endClientTurn();
+	}
+	if (data.gameOver) {
+		Framework.getGame()._setClientGameOver();
+	}
 }
 
 function handleTurnData(data) {

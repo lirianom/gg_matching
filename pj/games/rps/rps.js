@@ -8,6 +8,7 @@ $(document).ready(function() {
 	Framework.defineHandleData(handleData);
 	Framework.defineCountdownComplete(countdownComplete);
 	Framework.defineGame(game);
+	Framework.defineEndGameCleanUp(gameComplete);
 });
 
 /*
@@ -23,7 +24,8 @@ function handleData(data) {
 function countdownComplete() {
     $("#oppChoice").html(oppChoice);
     determineVictory();
-    Framework.getGame().setAllowMoves(false);
+	Framework.getGame().setGameOver();
+    //Framework.getGame().setAllowMoves(false);
 }
 
 /*
@@ -73,4 +75,10 @@ function moves() {
 
 }
 
+
+function gameComplete() {
+	$("#rock").off();
+	$("#paper").off();
+	$("#scissors").off();
+}
 

@@ -2,8 +2,8 @@ function Game(readyList) { // Constructor
     var player1;
     var player2;
     
-	var currentTurn;
-
+	var playerCurrentTurn;
+	var gameOver = false;
     var turnBased = false;
     var allowMoves = false;
     this.setPlayer1(readyList[0]);
@@ -12,7 +12,8 @@ function Game(readyList) { // Constructor
 }
 
 Game.prototype.initializeTurnGame = function() {
-    this.currentTurn = this.player1;
+	if (this.getGameOver()) { throwError("initializeTurnGame()", "cant be called when game is over"); }
+    this.playerCurrentTurn = this.player1;
     this.turnBased = true;
 }
 
@@ -34,24 +35,37 @@ Game.prototype.getPlayer2 = function() {
     return this.player2;
 }
 
+// Issue with naming 
 Game.prototype.currentTurn = function() {
-    return currentTurn;
+	if (this.getGameOver()) { throw new Error("currentTurn() cant be called when game is over"); }
+    return this.playerCurrentTurn;
 }
 
 Game.prototype.nextPlayer = function() {
-	if (this.currentTurn == this.player1) return this.player2;
+	if (this.getGameOver()) { throw new Error("nextPlayer() cant be called when game is over"); }
+	if (this.currentTurn() == this.player1) return this.player2;
 	else return this.player1;
 }
 
-Game.prototype.endTurn = function() {
-    if (this.currentTurn == this.player1) this.currentTurn = this.player2;
-    else this.currentTurn = this.player1;
+// Somehow make this private
+Game.prototype._endClientTurn = function() {
+	if (this.getGameOver()) { throw new Error("_endClientTurn() cant be called when game is over"); }
+    if (this.currentTurn() == this.player1) this.playerCurrentTurn = this.player2;
+    else this.playerCurrentTurn = this.player1;
 }
 
+Game.prototype.endTurn = function() {
+	if (this.getGameOver()) { throw new Error("endTurn() cant be called when game is over"); }
+	this._endClientTurn();
+	// Might need to hide this somehow so data cant be confused
+	Framework.sendData({"type":"gameInfo", "endTurn":true});
+}
+
+
 Game.prototype.movesAllowed = function() {
-    // If turn based game allow moves?
+	if (this.getGameOver()) { throw new Error("movesAllowed() cant be called when game is over"); }
     if (this.turnBased) {
-        return this.currentTurn == getPeerId();
+        return this.currentTurn() == getPeerId();
     }
     else {
         return this.allowMoves;
@@ -59,8 +73,26 @@ Game.prototype.movesAllowed = function() {
 }
 
 Game.prototype.setAllowMoves = function(val) {
-    if (typeof val != 'boolean') { throw new Error("setAllowMoves(boolean v) takes a boolean as a parameter not " + typeof val); }
+	if (this.getGameOver()) { throw new Error("setAllowMoves(val) cant be called when game is over"); }
+	if (typeof val != 'boolean') { throw new Error("setAllowMoves(boolean v) takes a boolean as a parameter not " + typeof val); }
 	this.allowMoves = val;
 }
 
+// make private
+Game.prototype._setClientGameOver = function() {
+	this.gameOver = true;
+	Framework.endGameCleanUp();	
+}
 
+Game.prototype.setGameOver = function() {
+	this._setClientGameOver();
+	Framework.sendData({"type":"gameInfo", "gameOver":true});
+}
+
+Game.prototype.getGameOver = function() {
+	return this.gameOver;
+}
+
+function throwError(func, msg) {
+	throw new Error(func + " " + msg);
+}
