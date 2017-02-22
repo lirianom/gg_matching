@@ -1,9 +1,15 @@
 
 //http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
 // try using this to include game in framework
-
+// Not sure how to include http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
+var GameInstance = (function(readyList) {
+"use strict";
+var instance;
 function Game(readyList) { // Constructor
-    var player1;
+    if (instance) return instance;
+	instance = this;
+
+	var player1;
     var player2;
     
 	var playerCurrentTurn;
@@ -100,3 +106,7 @@ Game.prototype.getGameOver = function() {
 function throwError(func, msg) {
 	throw new Error(func + " " + msg);
 }
+
+return Game;
+
+}());

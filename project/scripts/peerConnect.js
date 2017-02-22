@@ -21,12 +21,13 @@ var Framework = {};
 */
 var readyList = [];
 var globalGame; 
-var gameList = {
-            "http://adb07.cs.appstate.edu:9000/oldttt":"ot",
+var gameList = {};
+/*            "http://adb07.cs.appstate.edu:9000/oldttt":"ot",
             "http://adb07.cs.appstate.edu:9000/rps":"r",
             "http://adb07.cs.appstate.edu:9000/":"x",
             "http://adb07.cs.appstate.edu:9000/ttt":"t"
             };
+*/
 var connectedPeers = {};
 
 /*
@@ -91,6 +92,7 @@ Framework.readyUp = function() {
         readyList = $.unique(readyList);
         Framework.sendData({"type":"readyUp"});//,"waitForTurn":true});
         startGame(readyList);
+		$("#readyUp").off();
     });
 }
 
@@ -153,6 +155,7 @@ Framework.countdown = function() {
 */
 
 function createPeerId() {
+	loadGameList();
     var s = [];
     var hexDigits = "0123456789abcdef";
     for (var i = 0; i < 14; i++) {
@@ -162,6 +165,23 @@ function createPeerId() {
     var peerId = s.join("");
 	console.log(peerId);
     return peerId;
+}
+
+function loadGameList() {
+	var gameCount = 0;
+	// Had to foce getJSON to not be async so that the gameList is fetched without race condition
+	$.ajaxSetup({ async: false });
+	// Might want to use readFileSync
+    $.getJSON("/project/game-config.json", function(json) {
+        
+        json.games.forEach(function(val) {
+            var path = json.host + "/" +  val.name;
+			console.log(path);
+			gameList[path] = gameCount++;
+        });
+    });
+	// Highly reccomended to not do this
+	$.ajax({ async: true });
 }
 
 function getPeerIdSubset(peerId) {
@@ -243,7 +263,10 @@ function handleTurnData(data) {
 
 function startGame(readyList) {
     if (readyList.length == 2) {
-        globalGame = new Game(readyList);
+		// GameInstance is singleton pattern now so it can only be used once but if something
+		// makes a GameInstance before this method it will use that one.	
+        globalGame = new GameInstance(readyList);
+		console.log(JSON.stringify(globalGame));
         game();
     }
 }

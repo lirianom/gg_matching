@@ -45,12 +45,10 @@ function determineVictory() {
 
 function moves() {
 	count = 0;
-	console.log(Framework.getGame().currentTurn());
 	$(document).on("click", function() {
 		if (Framework.getGame().currentTurn() == Framework.getPeerId()) {
 			Framework.getGame().endTurn();
 			Framework.sendData({"type":"oldttt"});
-            //Framework.getGame().endTurn();
 		}
 	});
 }
