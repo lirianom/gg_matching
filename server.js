@@ -4,31 +4,29 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 
 app.get('/', function(req, res, next) {
     console.log("");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/index.html');
+    res.sendFile('/home/guigouma/capstone/split_match/project/index.html');
 });
 
 app.get('/rps', function(req, res, next) {
     console.log("rps");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/games/rps/rps.html');
+    res.sendFile('/home/guigouma/capstone/split_match/project/games/rps/rps.html');
 });
 
 app.get('/oldttt', function(req, res, next) {
     console.log("oldttt");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/games/oldttt/oldttt.html');
+    res.sendFile('/home/guigouma/capstone/split_match/project/games/oldttt/oldttt.html');
 });
 
 app.get('/ttt', function(req, res, next) {
     console.log("ttt");
-    res.sendFile('/home/guigouma/capstone/split_match/pj/games/ttt/ttt.html');
+    res.sendFile('/home/guigouma/capstone/split_match/project/games/ttt/ttt.html');
 });
 
 var server = app.listen(9000);
 var options = { debug : true, allow_discovery : true , proxied:true};
 
 app.use('/', ExpressPeerServer(server,options));
-//app.use("/scripts", express.static(__dirname + '/pj/scripts'));
-//app.use("/games", express.static(__dirname + '/pj/games'));
-app.use("/pj", express.static(__dirname + '/pj'));
+app.use("/project", express.static(__dirname + '/project'));
 
 server.on('connection', function(id) {
     //console.log(id)
