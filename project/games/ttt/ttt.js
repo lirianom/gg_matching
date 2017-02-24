@@ -1,6 +1,6 @@
 window.onload = init;
 
-var i = setInterval(updateWinner, 20);
+var i = setInterval(updateWinner, 34);
 var didMove = false;
 
 function init() {
@@ -152,7 +152,7 @@ function updateWinner(player) {
 		"waitForTurn":true,
 		"turnComplete":true,
 		"changedSqr":changedSqr,
-		"changedSign":changedSign
+		"changedSign":changedSign,
 	});
         didMove = false;
         sqr1.style.pointerEvents = "none";

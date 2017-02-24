@@ -81,10 +81,6 @@ Framework.endGameCleanUp = function() {
 	endGameCleanUp();
 }
 
-// public end game cleanup
-//Framework.endGameCleanUp = endGameCleanUp;
-
-
 Framework.readyUp = function() {
     $("#readyUp").on("click", function() {
         var pid = Framework.getPeerId();
@@ -120,6 +116,7 @@ Framework.getPeerId = function() {
 
 Framework.sendData = function(data) {
     eachActiveConnection(function(c,$c) {
+		data.time = (new Date()).getTime();
         c.send(data);
     });
 }
@@ -172,8 +169,7 @@ function loadGameList() {
 	// Had to foce getJSON to not be async so that the gameList is fetched without race condition
 	$.ajaxSetup({ async: false });
 	// Might want to use readFileSync
-    $.getJSON("/project/game-config.json", function(json) {
-        
+    $.getJSON("/project/game-config.json", function(json) {        
         json.games.forEach(function(val) {
             var path = json.host + "/" +  val.name;
 			console.log(path);
@@ -223,13 +219,13 @@ peer.on('error', function(err) {
 function connect(c) {
 	setupConnection(c);
     c.on('data', function(data) {
+	    console.log( (new Date()).getTime() - data.time );
 		onData(c,data);
    	});
 }
 
 function onData(c,data) {
-		console.log(data);
-        $(".active").prepend(data + c.label + "<br>");
+        $("#active").append(data + c.label + "<br>");
         // Potentially combine with waitForTurn
         if (data.hasOwnProperty('type') && data.type === "readyUp") {
             var rid = $("#rid").val(); // Might want to change to get value not from page
@@ -354,9 +350,10 @@ function isConnected() {
 
 // Temp function to test connection
 $(document).keypress(function ( e) {
-    eachActiveConnection(function(c,$c) {
+    /*eachActiveConnection(function(c,$c) {
         c.send(e.keyCode);
-    });
+    });*/
+	Framework.sendData({});
 });
 
 window.onunload = window.onbeforeunload = function(e) {

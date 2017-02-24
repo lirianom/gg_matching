@@ -18,11 +18,18 @@ $(document).ready(function() {
 function handleData(data) {
     if (data.type == "rps") {
         oppChoice = data.choice;
+		if (myMove != "undefined") {
+			console.log("game should be over");
+			determineVictory();
+			Framework.defineCountDownComplete({});
+			
+			Framework.getGame().setGameOver();
+
+		}
     }
 }
 
 function countdownComplete() {
-    $("#oppChoice").html(oppChoice);
     determineVictory();
 	Framework.getGame().setGameOver();
     //Framework.getGame().setAllowMoves(false);
@@ -39,6 +46,7 @@ function game() {
 }
 
 function determineVictory() {	
+	$("#oppChoice").html(oppChoice);
 	if (myMove == oppChoice) { $("#result").html("T"); }
 	else if (myMove == "Paper" && oppChoice == "Rock") $("#result").html("W");
 	else if (myMove == "Paper" && oppChoice == "Scissors") $("#result").html("L");
