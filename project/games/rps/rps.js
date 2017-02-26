@@ -1,19 +1,14 @@
-allowMoves = false;
-readyList = [];
-
 /*
 	READY
 */
+var myMove;
 
 $(document).ready(function() {
-	$("#readyUp").on("click", function() {
-		pid = $("#pid").val();
-		readyList.push(pid);
-		readyList = $.unique(readyList);
-		sendData({"type":"readyUp"});
-		game();
-	});
-
+	Framework.readyUp();
+	Framework.defineHandleData(handleData);
+	Framework.defineCountdownComplete(countdownComplete);
+	Framework.defineGame(game);
+	Framework.defineEndGameCleanUp(gameComplete);
 });
 
 /*
@@ -23,19 +18,21 @@ $(document).ready(function() {
 function handleData(data) {
     if (data.type == "rps") {
         oppChoice = data.choice;
-    }
-    if (data.type == "readyUp") {
-        rid = $("#rid").val();
-        readyList.push(rid);
-        readyList = $.unique(readyList);
-        game();
+		if (myMove != "undefined") {
+			console.log("game should be over");
+			determineVictory();
+			Framework.defineCountDownComplete({});
+			
+			Framework.getGame().setGameOver();
+
+		}
     }
 }
 
 function countdownComplete() {
-    $("#oppChoice").html(oppChoice);
     determineVictory();
-    allowMoves = false;
+	Framework.getGame().setGameOver();
+    //Framework.getGame().setAllowMoves(false);
 }
 
 /*
@@ -43,16 +40,13 @@ function countdownComplete() {
 */
 
 function game() {
-	console.log(readyList);
-	if (readyList.length == 2) {
-		allowMoves = true;
-		moves();
-		countdown();
-	}
+	Framework.getGame().setAllowMoves(true);
+	moves();
+	Framework.countdown();
 }
 
-function determineVictory() {
-	
+function determineVictory() {	
+	$("#oppChoice").html(oppChoice);
 	if (myMove == oppChoice) { $("#result").html("T"); }
 	else if (myMove == "Paper" && oppChoice == "Rock") $("#result").html("W");
 	else if (myMove == "Paper" && oppChoice == "Scissors") $("#result").html("L");
@@ -63,30 +57,36 @@ function determineVictory() {
 }
 
 function moves() {
-	
 	$("#rock").on("click", function() {
-		if (allowMoves) {
-			sendData({"type":"rps","choice":"Rock"});
+		if (Framework.getGame().movesAllowed()) {
+			Framework.sendData({"type":"rps","choice":"Rock"});
 			myMove = "Rock";
 			$("#myChoice").html("Rock");
 		}
 	});
 
 	$("#paper").on("click", function() {
-		if (allowMoves) {
-			sendData({"type":"rps","choice":"Paper"});
+		if (Framework.getGame().movesAllowed()) {
+			Framework.sendData({"type":"rps","choice":"Paper"});
 			myMove = "Paper";
 			$("#myChoice").html("Paper");
 		}
 	});
 
 	$("#scissors").on("click", function() {
-		if (allowMoves) {
-			sendData({"type":"rps","choice":"Scissors"});
+		if (Framework.getGame().movesAllowed()) {
+			Framework.sendData({"type":"rps","choice":"Scissors"});
 			myMove = "Scissors";
 			$("#myChoice").html("Scissors")
 		}
 	});
 
+}
+
+
+function gameComplete() {
+	$("#rock").off();
+	$("#paper").off();
+	$("#scissors").off();
 }
 
