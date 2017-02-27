@@ -5,7 +5,7 @@
 	If using countdown you need to define countdownComplete();
 */
 $(document).ready(function() {
-	Framework.initializeButtons();	
+	Framework.initializeFrameworkUI();	
 });
 
 (function(window) {
@@ -97,7 +97,17 @@ Framework.getGame = function() {
     return globalGame;
 }
 
-Framework.initializeButtons = function() {
+Framework.initializeFrameworkUI = function() {
+	initializeButtons();
+	initializeLogging();
+}
+
+function initializeLogging() {
+	$("body").append('<div class="active connection"></div>');
+	$("body").append('<div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee"><strong>Connection status</strong>:<br></div>');
+}
+
+function initializeButtons() {
 //	<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>
 //    <p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else's id"><input class="button" type="button" value="Connect" id="connect"></p>
 	$("body").prepend("<div id='ui'></div>");
