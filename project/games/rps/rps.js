@@ -9,6 +9,7 @@ $(document).ready(function() {
 	Framework.defineCountdownComplete(countdownComplete);
 	Framework.defineGame(game);
 	Framework.defineEndGameCleanUp(gameComplete);
+	Framework.defineInitialState(initial); // only used for rematch as of now
 });
 
 /*
@@ -21,6 +22,7 @@ function handleData(data) {
 		if (myMove !== undefined) {
 			Framework.forceEndCountdown();
 			Framework.getGame().setGameOver();
+		    Framework.rematch(); // confusion with F.rematch and F.getGame.rematch
 		}
     }
 }
@@ -29,6 +31,16 @@ function countdownComplete() {
     determineVictory();
 	Framework.getGame().setGameOver();
     //Framework.getGame().setAllowMoves(false);
+
+}
+
+function initial() {
+	myMove = undefined;
+	oppChoice = undefined;
+	$("#myChoice").html("");
+	$("#oppChoice").html("");
+	$("#countdown").html("");
+	$("#result").html("");
 }
 
 /*

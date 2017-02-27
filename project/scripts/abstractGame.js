@@ -103,6 +103,18 @@ Game.prototype.getGameOver = function() {
 	return this.gameOver;
 }
 
+Game.prototype._rematch = function() {
+	// Might want to create method to intialize startup stuff 
+	console.log("game rematch");
+	this.gameOver = false;
+}
+
+Game.prototype.rematch = function() {
+	if (!this.gameOver) { throw new Error("rematch() cant be called when game is not over use setGameOver()"); }
+	this._rematch();
+	//Framework.sendData({"type":"gameInfo", "rematch":true});
+}
+
 function throwError(func, msg) {
 	throw new Error(func + " " + msg);
 }

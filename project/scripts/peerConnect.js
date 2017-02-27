@@ -71,12 +71,23 @@ Framework.defineEndGameCleanUp = function(func) {
 
 }
 
+var initialState = function() { throw new Error("initialState() is not defined use defineInitialState(func)"); }
+Framework.defineInitialState = function(func) {
+    if (func !== 'undefined' && typeof func === 'function') {
+        initialState = func;
+    }
+    else {
+        throw new Error("defineInitialState(func) takes a function as a parameter not " + typeof func);
+    }
+
+}
+
+
 Framework.endGameCleanUp = function() {
 	endGameCleanUp();
 }
 
 Framework.readyUp = function() {
-	console.log("readyUp");	
 	var r = $('<button>');
 	r.attr("id", "readyUp");
 	r.html("Ready Up");
@@ -87,8 +98,9 @@ Framework.readyUp = function() {
         readyList.push(pid);
         readyList = $.unique(readyList);
         Framework.sendData({"type":"readyUp"});//,"waitForTurn":true});
-        startGame(readyList);
+        startGame(readyList);	
 		$("#readyUp").off();
+		$("#readyUp").remove();
     });
 }
 
@@ -100,12 +112,34 @@ Framework.getGame = function() {
 Framework.initializeFrameworkUI = function() {
 	initializeButtons();
 	initializeLogging();
+		
 }
+
+Framework.rematch = function() {
+	_rematch();
+	Framework.sendData({"type":"FrameworkInfo","callFunction":"rematch"});
+}
+
+function _rematch() {
+	console.log("rematch");
+	$("#ui").append("<button id='rematch'>Rematch</button>");
+	$("#rematch").on("click", function() {
+		Framework.readyUp();
+		readyList = [];
+		initialState();	
+		Framework.getGame().rematch();
+		$("#rematch").off();
+		$("#rematch").remove();
+	});
+}
+
+
 
 function initializeLogging() {
 	$("body").append('<div class="active connection"></div>');
 	$("body").append('<div class="log" style="color:#FF7500;text-shadow:none;padding:15px;background:#eee"><strong>Connection status</strong>:<br></div>');
 }
+
 
 function initializeButtons() {
 //	<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>
@@ -113,7 +147,8 @@ function initializeButtons() {
 	$("body").prepend("<div id='ui'></div>");
 	$("#ui").append('<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>');
 	$("#ui").append('<p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else\'s id"><input class="button" type="button" value="Connect" id="connect"></p>');
-	$("#ui").append("<hr>");	
+	$("#ui").append("<hr>");
+		
 	$('#connect').click(function() {
     	createConnection("manualConnection",$("#rid").val());
     });
@@ -263,19 +298,22 @@ function onData(c,data) {
 			if (data.callFunction == "forceEndCountdown") {
 				_forceEndCountdown();
 			}
+			if (data.callFunction == "rematch") {
+				_rematch();
+			}
 		}
-        if (data.hasOwnProperty('type') && data.type === "readyUp") {
+		else if (data.type == "gameInfo") {
+			handleGameInfoData(data);
+		}
+        else if (data.hasOwnProperty('type') && data.type === "readyUp") {
             var rid = $("#rid").val(); // Might want to change to get value not from page
             readyList.push(rid);
             readyList = $.unique(readyList);
             startGame(readyList);
         }
-        if (data.hasOwnProperty('type') && data.type == "gameInfo") {
-            handleGameInfoData(data);
+        else {
+			handleData(data);
 		}
-       	else {
-            handleData(data);
-        }
 }
 
 function handleGameInfoData(data) {
@@ -284,6 +322,9 @@ function handleGameInfoData(data) {
 	}
 	if (data.gameOver) {
 		Framework.getGame()._setClientGameOver();
+	}
+	if (data.rematch) {
+		Framework.getGame()._rematch();
 	}
 }
 
