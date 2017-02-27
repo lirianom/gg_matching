@@ -22,12 +22,6 @@ var Framework = {};
 var readyList = [];
 var globalGame; 
 var gameList = {};
-/*            "http://adb07.cs.appstate.edu:9000/oldttt":"ot",
-            "http://adb07.cs.appstate.edu:9000/rps":"r",
-            "http://adb07.cs.appstate.edu:9000/":"x",
-            "http://adb07.cs.appstate.edu:9000/ttt":"t"
-            };
-*/
 var connectedPeers = {};
 
 /*
@@ -82,6 +76,12 @@ Framework.endGameCleanUp = function() {
 }
 
 Framework.readyUp = function() {
+	console.log("readyUp");	
+	var r = $('<button>');
+	r.attr("id", "readyUp");
+	r.html("Ready Up");
+	$("#ui").append(r);
+	$("#ui").append("<hr>");
     $("#readyUp").on("click", function() {
         var pid = Framework.getPeerId();
         readyList.push(pid);
@@ -98,6 +98,12 @@ Framework.getGame = function() {
 }
 
 Framework.initializeButtons = function() {
+//	<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>
+//    <p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else's id"><input class="button" type="button" value="Connect" id="connect"></p>
+	$("body").prepend("<div id='ui'></div>");
+	$("#ui").append('<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>');
+	$("#ui").append('<p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else\'s id"><input class="button" type="button" value="Connect" id="connect"></p>');
+	$("#ui").append("<hr>");	
 	$('#connect').click(function() {
     	createConnection("manualConnection",$("#rid").val());
     });
@@ -126,16 +132,17 @@ Framework.sleep = function(delay) {
     while (new Date().getTime() < start + delay);
 }
 
+var countdownWorker;
 Framework.countdown = function() {
-    var w;
+    
     if (typeof(Worker) !== "undefined") {
-        if (typeof(w) == "undefined") {
-            w = new Worker("project/scripts/counter.js");
+        if (typeof(countdownWorker) == "undefined") {
+            countdownWorker = new Worker("project/scripts/counter.js");
         }
-        w.onmessage = function(event) {
+        countdownWorker.onmessage = function(event) {
             $("#countdown").html(event.data);
             if (event.data == 0) {
-                stopWorker(w);
+                stopWorker(countdownWorker);
                 countdownComplete();
             }
         };
@@ -147,9 +154,24 @@ Framework.countdown = function() {
 
 }
 
+Framework.forceEndCountdown = function() {
+	_forceEndCountdown();
+	Framework.sendData({"type":"FrameworkInfo","callFunction":"forceEndCountdown"});
+}
+
+function _forceEndCountdown() {
+	$("#countdown").html("0");
+	stopWorker(countdownWorker);
+}
+
+
 /*
 	Private functions only can be called internally
 */
+
+function setCountdownWorker(w) {
+	
+}
 
 function createPeerId() {
 	loadGameList();
@@ -227,6 +249,11 @@ function connect(c) {
 function onData(c,data) {
         $("#active").append(data + c.label + "<br>");
         // Potentially combine with waitForTurn
+		if (data.type == "FrameworkInfo") {
+			if (data.callFunction == "forceEndCountdown") {
+				_forceEndCountdown();
+			}
+		}
         if (data.hasOwnProperty('type') && data.type === "readyUp") {
             var rid = $("#rid").val(); // Might want to change to get value not from page
             readyList.push(rid);

@@ -3,6 +3,7 @@
   "host":"http://adb07.cs.appstate.edu:9000",
   "main_directory":"project",
   "games": [
+	{"name":"palamedes","file":"palamedes.html","path":"project/games/palamedes"},
 	{"name":"","file":"index.html","path":"project/"},
 	{"name":"rps","file":"rps.html","path":"project/games/rps/"},
 	{"name":"ttt","file":"ttt.html","path":"project/games/ttt/"},

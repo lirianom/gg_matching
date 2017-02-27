@@ -18,13 +18,9 @@ $(document).ready(function() {
 function handleData(data) {
     if (data.type == "rps") {
         oppChoice = data.choice;
-		if (myMove != "undefined") {
-			console.log("game should be over");
-			determineVictory();
-			Framework.defineCountDownComplete({});
-			
+		if (myMove !== undefined) {
+			Framework.forceEndCountdown();
 			Framework.getGame().setGameOver();
-
 		}
     }
 }
@@ -85,6 +81,8 @@ function moves() {
 
 
 function gameComplete() {
+    determineVictory();
+    Framework.defineCountdownComplete(function() {});
 	$("#rock").off();
 	$("#paper").off();
 	$("#scissors").off();
