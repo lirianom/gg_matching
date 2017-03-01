@@ -186,8 +186,9 @@ Framework.countdown = function() {
 
 // Calls the private _forceEndCountdown() function and tells the other peer to do the same
 Framework.forceEndCountdown = function() {
-	_forceEndCountdown();
-	Framework.sendData({"type":"FrameworkInfo","callFunction":"forceEndCountdown"});
+	//_forceEndCountdown();
+	callFunction("forceEndCountdown",_forceEndCountdown);
+	//Framework.sendData({"type":"FrameworkInfo","callFunction":"forceEndCountdown"});
 }
 
 
@@ -195,9 +196,16 @@ Framework.forceEndCountdown = function() {
 	Private functions only can be called internally
 */
 
+// Dynamically calls the passed in function for both clients
+function callFunction(name, func) {
+	Framework.sendData({"type":"FrameworkInfo","callFunction":name});
+	func();
+}
+
 function initializeRematch() { 
-	Framework.sendData({"type":"FrameworkInfo","callFunction":"initializeRematch"});
-	_initializeRematch();
+	//Framework.sendData({"type":"FrameworkInfo","callFunction":"initializeRematch"});
+	//_initializeRematch();
+	callFunction("initializeRematch", _initializeRematch);
 }
 
 // Creates the rematch button and redoes the ReadyUp for the game
@@ -529,8 +537,10 @@ function isConnected() {
 
 // End the specified web worker
 function stopCountdownWorker() {
-    countdownWorker.terminate();
-    countdownWorker = undefined;
+    if (typeof(countdownWorker) != "undefined" ) {
+		countdownWorker.terminate();
+    	countdownWorker = undefined;
+	}
 }
 
 // Private function to force end a countdown
