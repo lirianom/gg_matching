@@ -7,6 +7,7 @@ $(document).ready(function() {
 	Framework.defineHandleData(recieveData);
 	Framework.defineGame(game);
 	Framework.defineEndGameCleanUp(removeMoves);
+	Framework.defineInitialState(function() {} );
 });
 
 

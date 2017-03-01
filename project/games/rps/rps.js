@@ -28,10 +28,7 @@ function handleData(data) {
 }
 
 function countdownComplete() {
-    determineVictory();
 	Framework.getGame().setGameOver();
-    //Framework.getGame().setAllowMoves(false);
-
 }
 
 function initial() {
@@ -64,7 +61,7 @@ function determineVictory() {
 	else if (myMove == "Scissors" && oppChoice == "Paper") $("#result").html("W");
 }
 
-function moves() {
+function moves() {	
 	$("#rock").on("click", function() {
 		if (Framework.getGame().movesAllowed()) {
 			Framework.sendData({"type":"rps","choice":"Rock"});
@@ -94,7 +91,6 @@ function moves() {
 
 function gameComplete() {
     determineVictory();
-    Framework.defineCountdownComplete(function() {});
 	$("#rock").off();
 	$("#paper").off();
 	$("#scissors").off();

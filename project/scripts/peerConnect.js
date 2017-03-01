@@ -106,15 +106,21 @@ Framework.readyUp = function() {
 	$("#ui").append("<hr>");
 
     $("#readyUp").on("click", function() {
-        var pid = Framework.getPeerId();
+        /*
+		var pid = Framework.getPeerId();
         readyList.push(pid);
         readyList = $.unique(readyList);
         Framework.sendData({"type":"readyUp"});//,"waitForTurn":true});
-        startGame(readyList);	
+        */
+		addToReadyList(Framework.getPeerId());
+		askForPeersToAgree("readyUp");
+		startGame(readyList);	
+		
 		$("#readyUp").off();
 		$("#readyUp").remove();
     });
 }
+
 
 // Returns the globalGame instance 
 Framework.getGame = function() {
@@ -130,8 +136,9 @@ Framework.initializeFrameworkUI = function() {
 
 // Public rematch function calls the private rematch function and alerts the clients peer to call it aswell
 Framework.rematch = function() {
-	_rematch();
-	Framework.sendData({"type":"FrameworkInfo","callFunction":"rematch"});
+	initializeRematch();
+	//Framework.sendData({"type":"FrameworkInfo","callFunction":"rematch"});
+	
 }
 
 // Return the PeerId even if they are disconnected
@@ -159,7 +166,6 @@ Framework.sleep = function(delay) {
 // Public countdown function that counts down using counter.js
 var countdownWorker;
 Framework.countdown = function() {
-    
     if (typeof(Worker) !== "undefined") {
         if (typeof(countdownWorker) == "undefined") {
             countdownWorker = new Worker("project/scripts/counter.js");
@@ -167,7 +173,8 @@ Framework.countdown = function() {
         countdownWorker.onmessage = function(event) {
             $("#countdown").html(event.data);
             if (event.data == 0) {
-                stopWorker(countdownWorker);
+                stopCountdownWorker();
+				
                 countdownComplete();
             }
         };
@@ -188,12 +195,21 @@ Framework.forceEndCountdown = function() {
 	Private functions only can be called internally
 */
 
+function initializeRematch() { 
+	Framework.sendData({"type":"FrameworkInfo","callFunction":"initializeRematch"});
+	_initializeRematch();
+}
+
 // Creates the rematch button and redoes the ReadyUp for the game
 // Then calls the globalGames rematch function to restart the game
-function _rematch() {
-	console.log("rematch");
+function _initializeRematch() {
+	readyList = [];
 	$("#ui").append("<button id='rematch'>Rematch</button>");
 	$("#rematch").on("click", function() {
+		addToReadyList(Framework.getPeerId());
+		askForPeersToAgree("rematch");	
+		startRematch();
+		/*
 		Framework.readyUp();
 		readyList = [];
 		initialState();	
@@ -201,10 +217,21 @@ function _rematch() {
 		// Can just use startGame again and call initialState at the beginging 
 		// of the startGame.
 		Framework.getGame().rematch();
+		*/
 		$("#rematch").off();
 		$("#rematch").remove();
 	});
 }
+
+function startRematch() {
+	if (readyList.length == 2) {
+		Framework.readyUp();
+		readyList = [];
+		initialState();
+		Framework.getGame().rematch();
+	}
+}
+
 
 // Adds the html for logging at the bottom of the webpage
 function initializeLogging() {
@@ -319,7 +346,6 @@ window.onunload = window.onbeforeunload = function(e) {
 function connect(c) {
 	setupConnection(c);
     c.on('data', function(data) {
-	    console.log( (new Date()).getTime() - data.time );
 		onData(c,data);
    	});
 }
@@ -341,12 +367,12 @@ function onData(c,data) {
 		else if (data.type == "gameInfo") {
 			handleGameInfoData(data);
 		}
-        else if (data.hasOwnProperty('type') && data.type === "readyUp") {
+        /*else if (data.type === "readyUp") {
             var rid = $("#rid").val(); // Might want to change to get value not from page
             readyList.push(rid);
             readyList = $.unique(readyList);
             startGame(readyList);
-        }
+        }*/
         else {
 			handleData(data);
 		}
@@ -357,8 +383,17 @@ function handleFrameworkInfo(data) {
 	if (data.callFunction == "forceEndCountdown") {
         _forceEndCountdown();
     }
-    if (data.callFunction == "rematch") {
-    	_rematch();
+    if (data.callFunction == "initializeRematch") {
+	   	_initializeRematch();
+	}
+	// Could be issues with this being run before readyList cleared in other client
+	if (data.agreeTo == "rematch") {
+		addToReadyList($("#rid").val());
+		startRematch();
+	}
+	if (data.agreeTo == "readyUp") {
+		addToReadyList($("#rid").val()); // Need to add a function to get peer that is connected
+		startGame(readyList); // Dont need to pass readyList
 	}
 }
 
@@ -378,10 +413,7 @@ function handleGameInfoData(data) {
 
 // Handle turn based data - deprecated 
 function handleTurnData(data) {
-	//if (!myTurn) {
-		console.log("MyTurn");
-		handleData(data);	
-	//}
+	handleData(data);	
 }
 
 // Creates a GameInstance and calls the defined game method
@@ -390,9 +422,15 @@ function startGame(readyList) {
 		// GameInstance is singleton pattern now so it can only be used once but if something
 		// makes a GameInstance before this method it will use that one.	
         globalGame = new GameInstance(readyList);
+		initialState();	
 		console.log(JSON.stringify(globalGame));
         game();
     }
+}
+
+function addToReadyList(id) {
+	readyList.push(id);
+    readyList = $.unique(readyList);
 }
 
 // Loops through each active connection - currently limited to 1
@@ -408,6 +446,11 @@ function eachActiveConnection(fn) {
         }
         checkedIds[peerId] = 1;
     }
+}
+
+// Ask wait for both players to agree to command
+function askForPeersToAgree(command) {
+	Framework.sendData({"type":"FrameworkInfo","agreeTo":command});
 }
 
 // Displays the peer that you connect to, add them to the connectedPeers list and disconnect from the PeerJS server
@@ -485,15 +528,15 @@ function isConnected() {
  */
 
 // End the specified web worker
-function stopWorker(w) {
-    w.terminate();
-    w = undefined;
+function stopCountdownWorker() {
+    countdownWorker.terminate();
+    countdownWorker = undefined;
 }
 
 // Private function to force end a countdown
 function _forceEndCountdown() {
     $("#countdown").html("0");
-    stopWorker(countdownWorker);
+    stopCountdownWorker();
 }
 
 // Not sure what this is for
