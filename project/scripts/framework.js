@@ -41,7 +41,6 @@ var gameList = {};
 
 var tempHandleData;
 Framework.defineHandleData = function(func) {
-	//peer.defineHandleData(func);
 	tempHandleData = func;
 }
 

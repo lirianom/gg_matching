@@ -1,10 +1,14 @@
-window.onload = init;
+$(document).ready(function() {
+	init();
+
+});
 
 var i = setInterval(updateWinner, 34);
 var didMove = false;
 
 function init() {
     Framework.readyUp();
+	
     Framework.defineHandleData(receiveData);
     Framework.defineGame(game);
 	Framework.defineInitialState(function() {} );
