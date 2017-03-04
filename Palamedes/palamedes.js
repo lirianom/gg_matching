@@ -76,7 +76,7 @@ function myGameArea()  {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
     start : function() {
-        var myAvatar = new component(AVATARW, AVATARH, "red", 225, 570, this);
+        instance.myAvatar = new component(AVATARW, AVATARH, "red", 225, 570, this);
         var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
         var rightBound = new component(WALLW, AREAH, "purple", 480, 0, this);
         var floorBound = new component(AREAW, WALLW, "purple", 0, 550, this);
@@ -92,7 +92,7 @@ function myGameArea()  {
              queue.enqueue(makeRow(min, max));
         }
         this.interval1 = setInterval(function() {
-            updateGameArea(myAvatar, leftBound, rightBound, floorBound, instance);
+            updateGameArea(instance.myAvatar, leftBound, rightBound, floorBound, instance);
         }, 20);
         for (var i = 0; i < ROWLENGTH; i++) {
             row1[i] = 0;
