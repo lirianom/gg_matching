@@ -9,6 +9,7 @@ $(document).ready(function() {
 	Framework.defineCountdownComplete(countdownComplete);
 	Framework.defineGame(game);
 	Framework.defineEndGameCleanUp(gameComplete);
+	Framework.defineInitialState(initial); // only used for rematch as of now
 });
 
 /*
@@ -18,21 +19,25 @@ $(document).ready(function() {
 function handleData(data) {
     if (data.type == "rps") {
         oppChoice = data.choice;
-		if (myMove != "undefined") {
-			console.log("game should be over");
-			determineVictory();
-			Framework.defineCountDownComplete({});
-			
+		if (myMove !== undefined) {
+			Framework.forceEndCountdown();
 			Framework.getGame().setGameOver();
-
+		    Framework.rematch(); // confusion with F.rematch and F.getGame.rematch
 		}
     }
 }
 
 function countdownComplete() {
-    determineVictory();
 	Framework.getGame().setGameOver();
-    //Framework.getGame().setAllowMoves(false);
+}
+
+function initial() {
+	myMove = undefined;
+	oppChoice = undefined;
+	$("#myChoice").html("");
+	$("#oppChoice").html("");
+	$("#countdown").html("");
+	$("#result").html("");
 }
 
 /*
@@ -56,7 +61,7 @@ function determineVictory() {
 	else if (myMove == "Scissors" && oppChoice == "Paper") $("#result").html("W");
 }
 
-function moves() {
+function moves() {	
 	$("#rock").on("click", function() {
 		if (Framework.getGame().movesAllowed()) {
 			Framework.sendData({"type":"rps","choice":"Rock"});
@@ -85,6 +90,7 @@ function moves() {
 
 
 function gameComplete() {
+    determineVictory();
 	$("#rock").off();
 	$("#paper").off();
 	$("#scissors").off();

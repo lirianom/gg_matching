@@ -7,6 +7,7 @@ function init() {
     Framework.readyUp();
     Framework.defineHandleData(receiveData);
     Framework.defineGame(game);
+	Framework.defineInitialState(function() {} );
 }
 
 var count = 0;
