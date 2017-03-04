@@ -61,10 +61,10 @@ Queue.prototype.dequeue = function() {
 
 
 $(document).ready(function() {
-    myAvatar = new component(AVATARW, AVATARH, "red", 225, 570);
-    leftBound = new component(WALLW, AREAH, "purple", 0, 0);
-    rightBound = new component(WALLW, AREAH, "purple", 480, 0);
-    floorBound = new component(AREAW, WALLW, "purple", 0, 550);  
+    //myAvatar = new component(AVATARW, AVATARH, "red", 225, 570);
+    //leftBound = new component(WALLW, AREAH, "purple", 0, 0);
+    //rightBound = new component(WALLW, AREAH, "purple", 480, 0);
+    //floorBound = new component(AREAW, WALLW, "purple", 0, 550);  
     p1 = myGameArea();
     p1.start();
 });
@@ -72,7 +72,14 @@ $(document).ready(function() {
 function myGameArea()  {
     var instance = {
     canvas : document.createElement("canvas"),
+    clear : function () {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
     start : function() {
+        var myAvatar = new component(AVATARW, AVATARH, "red", 225, 570, this);
+        var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
+        var rightBound = new component(WALLW, AREAH, "purple", 480, 0, this);
+        var floorBound = new component(AREAW, WALLW, "purple", 0, 550, this);
         //array = new int[][];
         min = Math.ceil(CEIL);
         max = Math.floor(FLOOR);
@@ -80,7 +87,13 @@ function myGameArea()  {
         this.canvas.height = AREAH;
         this.context = this.canvas.getContext("2d");
         $("body").append(this.canvas);
-        this.interval1 = setInterval(updateGameArea, 20);
+        queue = new Queue();
+        for (var i = 0; i < QUEUELENGTH; i++) {
+             queue.enqueue(makeRow(min, max));
+        }
+        this.interval1 = setInterval(function() {
+            updateGameArea(myAvatar, leftBound, rightBound, floorBound, instance);
+        }, 20);
         for (var i = 0; i < ROWLENGTH; i++) {
             row1[i] = 0;
             row2[i] = 0;
@@ -110,10 +123,12 @@ function myGameArea()  {
             }
         }
         */
+        /*
         queue = new Queue(); 
         for (var i = 0; i < QUEUELENGTH; i++) {
              queue.enqueue(makeRow(min, max));
         }
+        */
         $(document).keydown(function(e) {
             var keyCode = e.keyCode;
             if (keyCode == 37) {
@@ -123,16 +138,17 @@ function myGameArea()  {
                 myAvatar.x += 50;
             }
         })
+        
 
-    },
-    clear : function () {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
+    //clear : function () {
+    //    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    //}
     }
     return instance;
 }
 
-function component(width, height, color, x, y) {
+function component(width, height, color, x, y, p) {
     this.width = width;
     this.height = height;
     this.speedX = 0;
@@ -140,7 +156,7 @@ function component(width, height, color, x, y) {
     this.x = x;
     this.y = y;
     this.update = function() {
-        ctx = p1.context;
+        ctx = p.context;
         ctx.fillStyle = color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
@@ -170,8 +186,8 @@ function component(width, height, color, x, y) {
     }
 }
 
-function updateGameArea() {
-    p1.clear();
+function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p) {
+    p.clear();
     //myAvatar.update();
     leftBound.update();
     rightBound.update();
@@ -193,17 +209,17 @@ function updateGameArea() {
         myAvatar.update()
     }
     */
-    drawRow(row1, 0);
-    drawRow(row2, 50);
-    drawRow(row3, 100);
-    drawRow(row4, 150);
-    drawRow(row5, 200);
-    drawRow(row6, 250);
-    drawRow(row7, 300);
-    drawRow(row8, 350);
-    drawRow(row9, 400);
-    drawRow(row10, 450);
-    drawRow(row11, 500);
+    drawRow(row1, 0, p);
+    drawRow(row2, 50, p);
+    drawRow(row3, 100, p);
+    drawRow(row4, 150, p);
+    drawRow(row5, 200, p);
+    drawRow(row6, 250, p);
+    drawRow(row7, 300, p);
+    drawRow(row8, 350, p);
+    drawRow(row9, 400, p);
+    drawRow(row10, 450, p);
+    drawRow(row11, 500, p);
     while (queue.size < 10) {
         queue.enqueue(makeRow(min, max));
     }
@@ -250,9 +266,9 @@ function insertRow() {
     queue.enqueue(makeRow(min, max));
 }
 
-function drawRow(row, y) {
+function drawRow(row, y, p) {
     var x = 25;
-    ctx = p1.context;
+    ctx = p.context;
     for (var i = 0; i < ROWLENGTH; i++) {
         if (row[i] != 0) {
         if (row[i] == 1) {
