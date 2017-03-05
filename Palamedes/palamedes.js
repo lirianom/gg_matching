@@ -24,7 +24,7 @@ var row10 = [ROWLENGTH];
 var row11 = [ROWLENGTH];
 
 var count = 0;
-var queue;
+//var queue;
 var min;
 var max;
 var p1;
@@ -65,11 +65,13 @@ $(document).ready(function() {
     //leftBound = new component(WALLW, AREAH, "purple", 0, 0);
     //rightBound = new component(WALLW, AREAH, "purple", 480, 0);
     //floorBound = new component(AREAW, WALLW, "purple", 0, 550);  
-    p1 = myGameArea();
+    p1 = myGameArea(readInput, initializeQueue, updateGameArea, rows);
     p1.start();
+    p2 = myGameArea(function(){}, function(){}, function(){}, function(){});
+    p2.start();
 });
 
-function myGameArea()  {
+function myGameArea(readInput, iq, uga, rows)  {
     var instance = {
     canvas : document.createElement("canvas"),
     clear : function () {
@@ -87,12 +89,13 @@ function myGameArea()  {
         this.canvas.height = AREAH;
         this.context = this.canvas.getContext("2d");
         $("body").append(this.canvas);
-        queue = new Queue();
-        for (var i = 0; i < QUEUELENGTH; i++) {
-             queue.enqueue(makeRow(min, max));
-        }
+        var queue = new Queue();
+        queue = iq(queue);
+        //for (var i = 0; i < QUEUELENGTH; i++) {
+        //     queue.enqueue(makeRow(min, max));
+        //}
         this.interval1 = setInterval(function() {
-            updateGameArea(instance.myAvatar, leftBound, rightBound, floorBound, instance);
+            uga(instance.myAvatar, leftBound, rightBound, floorBound, instance, queue, rows);
         }, 20);
         for (var i = 0; i < ROWLENGTH; i++) {
             row1[i] = 0;
@@ -128,16 +131,19 @@ function myGameArea()  {
         for (var i = 0; i < QUEUELENGTH; i++) {
              queue.enqueue(makeRow(min, max));
         }
-        */
-        $(document).keydown(function(e) {
+        */ 
+   
+            /*
             var keyCode = e.keyCode;
             if (keyCode == 37) {
-                myAvatar.x -= 50;
+                instance.myAvatar.x -= 50;
             }
             if (keyCode == 39) {
-                myAvatar.x += 50;
+                instance.myAvatar.x += 50;
             }
-        })
+            */
+        readInput(instance);   
+        //})
         
 
     }
@@ -146,6 +152,26 @@ function myGameArea()  {
     //}
     }
     return instance;
+}
+
+function readInput(instance) {
+    $(document).keydown(function(e) {
+    var keyCode = e.keyCode;
+    if (keyCode == 37) {
+        instance.myAvatar.x -= 50;
+    }
+    if (keyCode == 39) {
+        instance.myAvatar.x += 50;
+    }
+    });
+
+}
+
+function initializeQueue(queue) {
+    for (var i = 0; i < QUEUELENGTH; i++) {
+             queue.enqueue(makeRow(min, max));
+    }
+    return queue;    
 }
 
 function component(width, height, color, x, y, p) {
@@ -186,7 +212,7 @@ function component(width, height, color, x, y, p) {
     }
 }
 
-function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p) {
+function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, rows) {
     p.clear();
     //myAvatar.update();
     leftBound.update();
@@ -209,6 +235,8 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p) {
         myAvatar.update()
     }
     */
+    rows(p, queue);
+    /*
     drawRow(row1, 0, p);
     drawRow(row2, 50, p);
     drawRow(row3, 100, p);
@@ -227,9 +255,35 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p) {
     myAvatar.update();
     count += 1;
     if (count == 50) {
-        insertRow();
+        insertRow(queue);
         count = 0;
     }
+    */
+}
+
+function rows(p, queue) {
+    drawRow(row1, 0, p);
+    drawRow(row2, 50, p);
+    drawRow(row3, 100, p);
+    drawRow(row4, 150, p);
+    drawRow(row5, 200, p);
+    drawRow(row6, 250, p);
+    drawRow(row7, 300, p);
+    drawRow(row8, 350, p);
+    drawRow(row9, 400, p);
+    drawRow(row10, 450, p);
+    drawRow(row11, 500, p);
+    while (queue.size < 10) {
+        queue.enqueue(makeRow(min, max));
+    }
+    //myAvatar.newPos();
+    //myAvatar.update();
+    count += 1;
+    if (count == 50) {
+        insertRow(queue);
+        count = 0;
+    }
+
 }
 
 
@@ -242,7 +296,7 @@ function makeRow(min, max) {
     return a;
 }
 
-function insertRow() {
+function insertRow(queue) {
     var d = queue.dequeue();
     for (var i = 0; i < ROWLENGTH; i++) {
         //if (row11[i] != 0) {
