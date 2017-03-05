@@ -65,13 +65,13 @@ $(document).ready(function() {
     //leftBound = new component(WALLW, AREAH, "purple", 0, 0);
     //rightBound = new component(WALLW, AREAH, "purple", 480, 0);
     //floorBound = new component(AREAW, WALLW, "purple", 0, 550);  
-    p1 = myGameArea(readInput, initializeQueue, updateGameArea, rows);
+    p1 = myGameArea(readInput, initializeQueue, rows);
     p1.start();
-    p2 = myGameArea(function(){}, function(){}, function(){}, function(){});
+    p2 = myGameArea(function(){}, function(){}, function(){});
     p2.start();
 });
 
-function myGameArea(readInput, iq, uga, rows)  {
+function myGameArea(readInput, iq, r)  {
     var instance = {
     canvas : document.createElement("canvas"),
     clear : function () {
@@ -95,7 +95,7 @@ function myGameArea(readInput, iq, uga, rows)  {
         //     queue.enqueue(makeRow(min, max));
         //}
         this.interval1 = setInterval(function() {
-            uga(instance.myAvatar, leftBound, rightBound, floorBound, instance, queue, rows);
+            updateGameArea(instance.myAvatar, leftBound, rightBound, floorBound, instance, queue, r);
         }, 20);
         for (var i = 0; i < ROWLENGTH; i++) {
             row1[i] = 0;
@@ -214,7 +214,7 @@ function component(width, height, color, x, y, p) {
 
 function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, rows) {
     p.clear();
-    //myAvatar.update();
+    myAvatar.update();
     leftBound.update();
     rightBound.update();
     floorBound.update();
@@ -259,6 +259,7 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
         count = 0;
     }
     */
+
 }
 
 function rows(p, queue) {
