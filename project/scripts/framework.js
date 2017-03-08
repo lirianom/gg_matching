@@ -21,24 +21,13 @@ $(document).keypress(function ( e) {
 	Framework.sendData({});
 });
 
-/*
-	Fields
-*/
-
-
 var peer;
-
 var readyList = [];
 var globalGame; 
 var gameList = {};
 
-/*
-	Public functions can call by using Framework.XXXX
-*/
-
 // Maybe setting functions can be done with the abstract game
 // When data is sent this is the function that recieves the data
-
 var tempHandleData;
 Framework.defineHandleData = function(func) {
 	tempHandleData = func;
@@ -273,6 +262,7 @@ function loadGameList() {
 		});
 }
 
+// Handles communication for the framework between clients
 function handleFrameworkInfo(data) {
     if (data.callFunction == "forceEndCountdown") {
         _forceEndCountdown();
@@ -305,7 +295,6 @@ function handleGameInfo(data) {
     }
 }
 
-
 // Creates a GameInstance and calls the defined game method
 function startGame(readyList) {
     if (readyList.length == 2) {
@@ -318,6 +307,7 @@ function startGame(readyList) {
     }
 }
 
+// Add to readyList used for readyUp and Rematch
 function addToReadyList(id) {
     readyList.push(id);
     readyList = $.unique(readyList);
@@ -349,6 +339,7 @@ function setCountdownWorker(w) {
 
 // Framework object that can access all the public methods
 return Framework;
+
 }
 
 // Ensure that only one Framework gets defined

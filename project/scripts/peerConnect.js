@@ -56,11 +56,11 @@ instance.createPeer = function(configs) {
     peer.on('error', function(err) {
         console.log(err);
     });
+
     return peer;
 }
 
 instance.peer = instance.createPeer(configs);
-
 
 // Returns a list of all the peers connected to the PeerJS server
 instance.getAllConnections = function(res) {
@@ -131,7 +131,7 @@ instance.attemptConnection = function() {
     });
 }
 
-
+// Return PeerId for a client that is connected or disconnected from the Express Server
 instance.getPeerId = function() {
     if (this.peer.open)
         return this.peer.id;
@@ -146,11 +146,6 @@ instance.connect = function(c) {
 		instance.onData(c,data);
    	});
 }
-
-
-/**
- *  Functions to assist PeerJS connection
- */
 
 // onData reads the data object and handles it appropriatly
 // if it is a FrameworkInfo, gameInfo, or specific to the implemented game call
@@ -169,14 +164,17 @@ instance.onData = function(c,data) {
 		}
 }
 
+// Define function to handle framework info that gets created in framework
 instance.defineHandleFrameworkInfo = function(func) {
 	instance.handleFrameworkInfo = func;
 }
 
+// Define function to handle game info that gets created in framework
 instance.defineHandleGameInfo = function(func) {
 	instance.handleGameInfo = func;
 }
 
+// Define handle data that gets created by the game
 instance.handleData = function () { throw new Error("handleData(data) is not defined use defineHandleData(func)"); }
 instance.defineHandleData = function(func) {
 	console.log(func);
@@ -208,7 +206,6 @@ instance.eachActiveConnection = function(fn) {
     }
 }
 
-
 // Ask wait for both players to agree to command
 instance.askForPeersToAgree = function(command) {
 	Framework.sendData({"type":"FrameworkInfo","agreeTo":command});
@@ -225,6 +222,8 @@ window.onunload = window.onbeforeunload = function(e) {
     	instance.peer.destroy();
 	}
 };
+
 return instance;
+
 }
 
