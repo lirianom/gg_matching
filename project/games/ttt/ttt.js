@@ -209,7 +209,7 @@ function updateWinner(player) {
 
 function endGame(player) {
     clearInterval(i);
-    
+	    
     sqr1.style.pointerEvents = "none";
     sqr2.style.pointerEvents = "none";
     sqr3.style.pointerEvents = "none";

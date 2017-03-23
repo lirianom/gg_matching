@@ -30,6 +30,8 @@ var max;
 var p1;
 var p2;
 var position;
+var shot;
+var rowWorker = new Worker('workRow.js');
 
 function Queue() {
     this.oldestIndex = 1;
@@ -83,7 +85,7 @@ function myGameArea(ri, iq, r, temp)  {
 	isP1 : temp,
     canvas : document.createElement("canvas"),
 	clearAva : function() {
-		this.context.clearRect(25, 550, 450, this.canvas.height);
+		this.context.clearRect(0, 550, 500, this.canvas.height);
 	},
     clear : function () {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -104,8 +106,9 @@ function myGameArea(ri, iq, r, temp)  {
         queue = iq(queue);
         //for (var i = 0; i < QUEUELENGTH; i++) {
         //     queue.enqueue(makeRow(min, max));
-        //}
+        //
         this.interval1 = setInterval(function() {
+	    $(instance.canvas).stop(true,true);
             updateGameArea(instance.myAvatar, leftBound, rightBound, floorBound, instance, queue, r);
         }, 20);
         for (var i = 0; i < ROWLENGTH; i++) {
@@ -174,7 +177,21 @@ function readInput(instance) {
     if (keyCode == 39) {
         instance.myAvatar.x += 50;
     }
+    if (keyCode == 38) {
+	shootProjectile();
+    }
+    if (keyCode == 40) {
+	swapShot();
+    }
     });
+
+}
+
+function shootProjectile() {
+        
+}
+
+function swapShot() {
 
 }
 
@@ -334,6 +351,7 @@ function rows(p, queue) {
     if (count == 50) {
         insertRow(queue);
         count = 0;
+	space = 
     }
 
 }

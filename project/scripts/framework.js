@@ -6,6 +6,22 @@
 */
 $(document).ready(function() {
 	Framework.initializeFramework();	
+
+ 	$.ajax({
+        url: '/login',
+		type: "POST",
+		complete: function() {
+			console.log("complete");
+		},
+		success: function(data) {
+			console.log(data);
+		},
+		error: function() {
+			console.log("error");
+		}
+		
+
+	});
 });
 
 (function(window) {
