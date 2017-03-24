@@ -7,7 +7,7 @@
 $(document).ready(function() {
 	Framework.initializeFramework();	
 
- 	$.ajax({
+/* 	$.ajax({
         url: '/login',
 		type: "POST",
 		complete: function() {
@@ -21,7 +21,7 @@ $(document).ready(function() {
 		}
 		
 
-	});
+	});*/
 });
 
 (function(window) {
