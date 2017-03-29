@@ -1,42 +1,60 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-    <title>Capstone</title>
+    <title>TTT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Language" content="en-us">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+	
+	<!-- Login -->
+	<meta name="google-signin-client_id" content="585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="project/scripts/login.js"></script>
+		
+	<!-- Game -->
     <script src="project/scripts/peerConnect.js"></script>
 	<script src="project/scripts/framework.js"></script>
-    <script src="project/scripts/copyToClip.js"></script>
     <script src="project/games/ttt/ttt.js"></script> 
     <script src="project/scripts/abstractGame.js"></script>
 	<link rel="stylesheet" href="project/games/ttt/tictactoe.css">
 <body>    	
+	<div class="login_bar">
+		<h5 id="logo" class="color_orange">GG</h5>
+		<ul id="nav">
+            <li><div class="g-signin2" data-onsuccess="onSignIn"></div></li>
+        </ul>
+	</div>
+
+	<div class="connection_bar">
+		<!-- Added at runtime -->
+	</div>
+
     <div id="ttt">
 
-    <table>
-        <tr>
-            <td><canvas id = "sqr1" class = "row1"></canvas></td>
-            <td><canvas id = "sqr2" class = "row1"></canvas></td>
-            <td><canvas id = "sqr3" class = "row1"></canvas></td>
-        </tr>    
+    	<table>
+        	<tr>
+            	<td><canvas id = "sqr1" class = "row1"></canvas></td>
+            	<td><canvas id = "sqr2" class = "row1"></canvas></td>
+            	<td><canvas id = "sqr3" class = "row1"></canvas></td>
+        	</tr>    
         
-        <tr>
-            <td><canvas id = "sqr4" class = "row2"></canvas></td>
-            <td><canvas id = "sqr5" class = "row2"></canvas></td>
-            <td><canvas id = "sqr6" class = "row2"></canvas></td>
-        </tr>    
-        
-        <tr>
-            <td><canvas id = "sqr7" class = "row3"></canvas></td>
-            <td><canvas id = "sqr8" class = "row3"></canvas></td>
-            <td><canvas id = "sqr9" class = "row3"></canvas></td>
-        </tr>
-        <tr>
-            <td><canvas id = "blank"></canvas>
-        </tr>    
-	</table>
+	        <tr>
+    	        <td><canvas id = "sqr4" class = "row2"></canvas></td>
+        	    <td><canvas id = "sqr5" class = "row2"></canvas></td>
+            	<td><canvas id = "sqr6" class = "row2"></canvas></td>
+	        </tr>    
+    	    
+        	<tr>
+            	<td><canvas id = "sqr7" class = "row3"></canvas></td>
+	            <td><canvas id = "sqr8" class = "row3"></canvas></td>
+    	        <td><canvas id = "sqr9" class = "row3"></canvas></td>
+        	</tr>
+        	<tr>
+            	<td><canvas id = "blank"></canvas>
+        	</tr>    
+		</table>
+
 	</div>
 </body>
 </html>

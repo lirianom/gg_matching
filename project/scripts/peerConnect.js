@@ -70,7 +70,7 @@ instance.getAllConnections = function(res) {
 			listOfUsers.push(res[i]); 
         }
     } 
-	console.log(listOfUsers);
+	//console.log(listOfUsers);
 	return listOfUsers;
 }
 
@@ -177,7 +177,7 @@ instance.defineHandleGameInfo = function(func) {
 // Define handle data that gets created by the game
 instance.handleData = function () { throw new Error("handleData(data) is not defined use defineHandleData(func)"); }
 instance.defineHandleData = function(func) {
-	console.log(func);
+	//console.log(func);
     if (func !== 'undefined' && typeof func === 'function') {
         instance.handleData = func;
     }

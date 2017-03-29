@@ -1,14 +1,14 @@
+var i;
+var didMove = false;
+
 $(document).ready(function() {
+	Framework.readyUp();
 	init();
 
 });
 
-var i = setInterval(updateWinner, 34);
-var didMove = false;
-
 function init() {
-    Framework.readyUp();
-	
+	i = setInterval(updateWinner, 34)	
     Framework.defineHandleData(receiveData);
     Framework.defineGame(game);
 	Framework.defineInitialState(function() {} );

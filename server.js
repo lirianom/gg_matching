@@ -1,3 +1,4 @@
+var routes = require("./routes/login.js");
 var fs = require('fs');
 var gameConfig = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 var express = require('express');
@@ -25,6 +26,11 @@ gameConfig.games.forEach(function (val) {
 
 });
 
+app.get("/", function(req, res, next) {
+    console.log("/");
+    res.sendFile("project/index.html", {root : __dirname } );
+});
+
 var server = app.listen(9000);
 var options = { debug : true, allow_discovery : true , proxied:true};
 
@@ -32,44 +38,15 @@ app.use('/', ExpressPeerServer(server,options));
 app.use("/" + gameConfig.main_directory, express.static(__dirname + '/' + gameConfig.main_directory));
 
 app.post('/login', function(req, res, next) {
-	var token = req.body.id;
-	//	http://stackoverflow.com/questions/34833820/do-we-need-to-hide-the-google-oauth-client-id
-	var CLIENT_ID = "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com";
-	var GoogleAuth = require('google-auth-library');
-	var auth = new GoogleAuth;
-	var client = new auth.OAuth2(CLIENT_ID, '', '');
-	client.verifyIdToken(
-    	token,
-    	CLIENT_ID,
-    	// Or, if multiple clients access the backend:
-    	//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3],
-    	function(e, login) {
-		
-      		var payload = login.getPayload();
-      		var userid = payload['sub'];
-			// check if valid 
-			var confirmed_id = payload.sub;
-			r.table('users').filter({"id":confirmed_id}).run(connection,
-			function(err, cursor) {
-				if (err) throw err;
-				cursor.toArray(function(err, result) {
-					if (err) throw err;
-					console.log(JSON.stringify(result, null, 2));	
-					if (result.length == 0) {
-						r.table('users').insert([{"id":confirmed_id}]).run(connection, function(err, result) {
-                			if (err) throw err;
-            		    	console.log(JSON.stringify(result, null, 2));
-			            })
-	
-					}
-				});
-			}
-			);
-			//https://developers.google.com/identity/sign-in/web/backend-auth
-      		//If request specified a G Suite domain:
-      		//var domain = payload['hd'];
-    	});	
-		
+	routes.login(req,res,connection,r);
+});
+
+app.post('/setupUser', function(req, res, next) {
+	routes.setupUser(req,res,connection,r);
+});
+
+app.post('/updatescore', function(req, res, next) {
+	routes.updateScore(req,res,connection,r);
 });
 
 server.on('connection', function(id) {

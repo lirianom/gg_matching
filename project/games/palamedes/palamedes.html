@@ -5,20 +5,37 @@
         <title>Palamedes</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		<script src="http://cdn.peerjs.com/0.3/peer.js"></script>
-		<script src="project/scripts/peerConnect.js"></script>
-	<script src="project/scripts/framework.js"></script>
-	<script src="project/scripts/copyToClip.js"></script>
-	<script src="project/scripts/abstractGame.js"></script>
-        <script src = "project/games/palamedes/palamedes.js"></script>
+		
+		<!-- Login -->
+    	<meta name="google-signin-client_id" content="585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com">
+	    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    	<script src="project/scripts/login.js"></script>
 
+
+		<!-- Game -->
+		<script src="project/scripts/peerConnect.js"></script>
+		<script src="project/scripts/framework.js"></script>
+		<script src="project/scripts/abstractGame.js"></script>
+        <script src = "project/games/palamedes/palamedes.js"></script>
+		
         <link rel = "stylesheet" href = "project/games/palamedes/palamedes.css">
     </head>
     <body>
-    <div id="game">
-		<div id="palamedes">
+		<div class="login_bar">
+			<h5 id="logo" class="color_orange">GG</h5>
+			<ul id="nav">
+    	        <li><div class="g-signin2" data-onsuccess="onSignIn"></div></li>
+	        </ul>
+
 		</div>
-		<div id="palamedes2"> 
+
+		<div class="connection_bar">
+			<!-- Added at runtime -->
 		</div>
-    </div>
+
+    	<div id="game">
+			<div id="palamedes"></div>
+			<div id="palamedes2"></div>
+    	</div>
     </body>
 </html>

@@ -91,6 +91,17 @@ Game.prototype.setAllowMoves = function(val) {
 // make private
 Game.prototype._setClientGameOver = function() {
 	this.gameOver = true;
+	console.log(gapi.auth2);
+	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+	console.log(id_token);
+	$.ajax({
+		type: "POST",
+		url: "/updateScore",
+		data: {"id": id_token},
+		success: function(data) {
+			console.log("Updated Score");
+		}
+	});
 	Framework.endGameCleanUp();	
 }
 

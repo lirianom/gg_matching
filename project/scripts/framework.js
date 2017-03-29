@@ -5,24 +5,27 @@
 	If using countdown you need to define countdownComplete();
 */
 $(document).ready(function() {
-	Framework.initializeFramework();	
-
-/* 	$.ajax({
-        url: '/login',
-		type: "POST",
-		complete: function() {
-			console.log("complete");
-		},
-		success: function(data) {
-			console.log(data);
-		},
-		error: function() {
-			console.log("error");
-		}
-		
-
-	});*/
+	// duplicate adding this for some reason 
+	// possibly can condense this with login
+	//$(document).append('<script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>');
+	$.getScript("https://apis.google.com/js/platform.js").then(FrameworkInit);
 });
+
+function FrameworkInit() {
+	// used when changing from default page to game
+	// need to set this up so it checks if they login on the page or could just prohibit that
+	// maybe redirect back to home page if not logged in
+	console.log("here");
+	gapi.auth2.init({client_id : "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com"})
+	.then(function() {
+		var logged_in = gapi.auth2.getAuthInstance().isSignedIn.get();
+		console.log("Logged in is: " + logged_in);	
+		if (logged_in) {
+			Framework.initializeFramework();
+			$.getScript("project/scripts/copyToClip.js");
+		}
+	});
+}
 
 (function(window) {
 
@@ -106,8 +109,8 @@ Framework.readyUp = function() {
 	var r = $('<button>');
 	r.attr("id", "readyUp");
 	r.html("Ready Up");
-	$("#ui").append(r);
-	$("#ui").append("<hr>");
+	$(".connection_bar").append(r);
+	$(".connection_bar").append("<hr>");
 
     $("#readyUp").on("click", function() {
 		addToReadyList(Framework.getPeerId());
@@ -128,6 +131,7 @@ Framework.getGame = function() {
 
 // Sets up connection buttons and text boxes aswell as logging 
 Framework.initializeFramework = function() {
+	//console.log(gapi.auth2.getAuthInstance().isSignedIn.get());
 	initializeButtons();
 	initializeLogging();
 	loadGameList(); // game config file
@@ -208,7 +212,7 @@ function initializeRematch() {
 // Then calls the globalGames rematch function to restart the game
 function _initializeRematch() {
 	readyList = [];
-	$("#ui").append("<button id='rematch'>Rematch</button>");
+	$(".connection_bar").append("<button id='rematch'>Rematch</button>");
 	$("#rematch").on("click", function() {
 		addToReadyList(Framework.getPeerId());
 		peer.askForPeersToAgree("rematch");	
@@ -236,10 +240,8 @@ function initializeLogging() {
 
 // Adds the connection buttons and text boxes at the top of the webpage
 function initializeButtons() {
-	$("body").prepend("<div id='ui'></div>");
-	$("#ui").append('<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>');
-	$("#ui").append('<p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else\'s id"><input class="button" type="button" value="Connect" id="connect"></p>');
-	$("#ui").append("<hr>");
+	$(".connection_bar").prepend('<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>');
+	$(".connection_bar").prepend('<p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else\'s id"><input class="button" type="button" value="Connect" id="connect"></p>');
 		
 	$('#connect').click(function() {
     	peer.createConnection("manualConnection",$("#rid").val());
@@ -271,7 +273,7 @@ function loadGameList() {
 			peer.defineHandleData(tempHandleData);
 			peer.defineHandleFrameworkInfo(handleFrameworkInfo);
 			peer.defineHandleGameInfo(handleGameInfo);
-			console.log(peer);
+			//console.log(peer);
 		})
 		.fail(function() {
 			console.log("Error: Failed to load Game List");

@@ -31,7 +31,7 @@ var p1;
 var p2;
 var position;
 var shot;
-var rowWorker = new Worker('workRow.js');
+//var rowWorker = new Worker('workRow.js');
 
 function Queue() {
     this.oldestIndex = 1;
@@ -95,6 +95,17 @@ function myGameArea(ri, iq, r, temp)  {
         var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
         var rightBound = new component(WALLW, AREAH, "purple", 480, 0, this);
         var floorBound = new component(AREAW, WALLW, "purple", 0, 550, this);
+		instance.spaces = new Array(11);
+		for (var i = 0; i < 11; i++) {
+			instance.spaces[i] = new Array(9);
+		}
+		console.log(instance.spaces);
+		for (var i = 0; i < 11; i++) {
+			for (var j = 0; j < 9; j++) {
+				instance.spaces[i][j] = new component(AVATARW, AVATARH, "grey", ((j*50)+25), i*50, this);
+				//instance.spaces[i][j] = 1;
+			}
+		}  
         //array = new int[][];
         min = Math.ceil(CEIL);
         max = Math.floor(FLOOR);
@@ -209,6 +220,7 @@ function component(width, height, color, x, y, p) {
     this.speedY = 0;
     this.x = x;
     this.y = y;
+	this.crashFlag = true;
     this.update = function() {
         ctx = p.context;
         ctx.fillStyle = color;
@@ -219,6 +231,7 @@ function component(width, height, color, x, y, p) {
         this.y += this.speedY;
     }
     this.crashWith = function(otherobj) {
+		if (this.crashFlag) {
         var myleft = this.x;
         var myright = this.x + (this.width);
         var mytop = this.y;
@@ -236,8 +249,14 @@ function component(width, height, color, x, y, p) {
         }
 
         return crash;
+		}
 
     }
+	this.remove = function() {
+		ctx = p.context;
+		ctx.clearRect(this.x, this.y, this.width, this.height);
+		this.crashFlag = false;		
+	}
 }
 
 function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, rows) {
@@ -247,6 +266,11 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
     leftBound.update();
     rightBound.update();
     floorBound.update();
+	for (var i = 0; i < 11; i++) {
+		for (var j = 0; j < 9; j++) {
+			p.spaces[i][j].update();
+		}
+	}
     if (myAvatar.x < 25) {
         myAvatar.x = 25;
     }
@@ -350,8 +374,7 @@ function rows(p, queue) {
     count += 1;
     if (count == 50) {
         insertRow(queue);
-        count = 0;
-	space = 
+        count = 0; 
     }
 
 }
@@ -390,7 +413,10 @@ function insertRow(queue) {
     queue.enqueue(makeRow(min, max));
 }
 
+//var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
+
 function drawRow(row, y, p) {
+/*
     var x = 25;
     ctx = p.context;
     for (var i = 0; i < ROWLENGTH; i++) {
@@ -413,6 +439,46 @@ function drawRow(row, y, p) {
         x += 50;
 
     }
+*/
+
+    var x = 25;
+	var rowIndex = 1;
+	var color;
+    for (var i = 0; i < ROWLENGTH; i++) {
+       
+		switch(row[i]) {
+			case 0:
+				color = "grey";
+				//p.spaces[i][rowIndex].remove = false;
+			case 1:
+				color = "blue";
+				break;
+			case 2: 
+				color = "brown";
+				break;
+		    case 3:
+                color = "yellow";
+                break;
+			case 4:
+                color = "pink";
+                break;
+			case 5:
+                color = "orange";
+                break;
+			case 6:
+                color = "green";
+                break;
+			default:
+                break;
+		}
+		
+		//p.spaces[i][rowIndex].remove;
+		p.spaces[i][rowIndex] = new component(AVATARW, AVATARH, color, x, y, p);
+		x += 50;
+		rowIndex++;
+	       
+    }
+
 }
 
 function endGame() {
