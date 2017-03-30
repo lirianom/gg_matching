@@ -28,7 +28,7 @@ checkAuth: function(req) {
             //var domain = payload['hd'];
         }
     );
-    console.log(userid);
+    console.log("Verify: " + userid);
     return userid;
 
 },

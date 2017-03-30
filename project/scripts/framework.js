@@ -15,7 +15,6 @@ function FrameworkInit() {
 	// used when changing from default page to game
 	// need to set this up so it checks if they login on the page or could just prohibit that
 	// maybe redirect back to home page if not logged in
-	console.log("here");
 	gapi.auth2.init({client_id : "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com"})
 	.then(function() {
 		var logged_in = gapi.auth2.getAuthInstance().isSignedIn.get();

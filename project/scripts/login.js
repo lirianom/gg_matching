@@ -1,6 +1,5 @@
 
 $(document).ready(function() {
-	$('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', 'project/login_bar.css') );
 	$("#nav").prepend('<li><button class="g-signout2" >Sign out</button></li>');	
 	$(".g-signout2").on("click", signOut);
 });

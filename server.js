@@ -1,6 +1,7 @@
 var routes = require("./routes/login.js");
 var fs = require('fs');
 var gameConfig = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+var creds = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
 var express = require('express');
 var app = express();
 var ExpressPeerServer = require('peer').ExpressPeerServer;
@@ -9,9 +10,10 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+
 r = require("rethinkdb");
 var connection = null;
-r.connect({ host: 'localhost', port: 28015, db: 'GG' }, function(err, conn) {
+r.connect(creds, function(err, conn) {
 	if (err) throw err
   	connection = conn;
 });
