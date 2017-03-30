@@ -78,14 +78,30 @@ setupUser: function(req,res,connection,r) {
 },
 
 updateScore: function(req,res,connection,r) {
+	var isWinner = req.body.isWinner;
 	var confirmed_id = module.exports.checkAuth(req);
+	console.log(isWinner);
 	if ( confirmed_id != null) {
-        r.table('users').get(confirmed_id).update({"win": r.row("win").add(1)}).run(connection,
-            function(err, cursor) {
-                if (err) throw err;
-                res.send();
-            }
-        );
+		console.log(typeof(isWinner) + isWinner);
+		if (isWinner == "true") {
+			console.log("test");	
+        	r.table('users').get(confirmed_id).update({"win": r.row("win").add(1)}).run(connection,
+            	function(err, cursor) {
+            	    if (err) throw err;
+                	res.send();
+            	}
+        	);
+		}
+		else {
+			console.log("test2");
+			r.table('users').get(confirmed_id).update({"loss": r.row("loss").add(1)}).run(connection,
+                function(err, cursor) {
+                    if (err) throw err;
+                    res.send();
+                }
+            );	
+
+		}
     };
 
     console.log("Updated Score for: " + confirmed_id);

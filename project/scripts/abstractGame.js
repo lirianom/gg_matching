@@ -19,6 +19,7 @@ function Game(readyList) { // Constructor
     this.setPlayer1(readyList[0]);
     this.setPlayer2(readyList[1]);
 
+	var winner;
 }
 
 Game.prototype.initializeTurnGame = function() {
@@ -90,22 +91,29 @@ Game.prototype.setAllowMoves = function(val) {
 
 // make private
 Game.prototype._setClientGameOver = function() {
+	var isWinner = false;
 	this.gameOver = true;
-	console.log(gapi.auth2);
 	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
-	console.log(id_token);
+	Framework.endGameCleanUp();
+	if (this.winner == Framework.getPeerId())
+	{
+		isWinner = true;	
+	}
 	$.ajax({
 		type: "POST",
 		url: "/updateScore",
-		data: {"id": id_token},
+		data: {"id": id_token,"isWinner":isWinner},
 		success: function(data) {
 			console.log("Updated Score");
 		}
 	});
-	Framework.endGameCleanUp();	
 }
 
-Game.prototype.setGameOver = function() {
+Game.prototype.setWinner = function(id) {
+	this.winner = id;
+}
+
+Game.prototype.setGameOver = function(isWinner) {
 	this._setClientGameOver();
 	Framework.sendData({"type":"gameInfo", "gameOver":true});
 }
@@ -118,6 +126,7 @@ Game.prototype._rematch = function() {
 	// Might want to create method to intialize startup stuff 
 	console.log("game rematch");
 	this.gameOver = false;
+	this.winner = undefined;
 }
 
 Game.prototype.rematch = function() {
