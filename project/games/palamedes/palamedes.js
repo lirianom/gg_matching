@@ -99,10 +99,10 @@ function myGameArea(ri, iq, r, temp)  {
 		for (var i = 0; i < 11; i++) {
 			instance.spaces[i] = new Array(9);
 		}
-		console.log(instance.spaces);
+		//console.log(instance.spaces);
 		for (var i = 0; i < 11; i++) {
 			for (var j = 0; j < 9; j++) {
-				instance.spaces[i][j] = new component(AVATARW, AVATARH, "grey", ((j*50)+25), i*50, this);
+				instance.spaces[i][j] = new component(AVATARW, AVATARH, "grey", 10000, 10000, this);
 				//instance.spaces[i][j] = 1;
 			}
 		}  
@@ -218,12 +218,13 @@ function component(width, height, color, x, y, p) {
     this.height = height;
     this.speedX = 0;
     this.speedY = 0;
+	this.color = color;
     this.x = x;
     this.y = y;
 	this.crashFlag = true;
     this.update = function() {
         ctx = p.context;
-        ctx.fillStyle = color;
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
     this.newPos = function() {
@@ -256,6 +257,11 @@ function component(width, height, color, x, y, p) {
 		ctx = p.context;
 		ctx.clearRect(this.x, this.y, this.width, this.height);
 		this.crashFlag = false;		
+	}
+	this.change = function(color, x, y) {
+    	this.color = color;
+		this.x = x;
+		this.y = y;				
 	}
 }
 
@@ -344,7 +350,7 @@ function recieveData(data) {
         drawRow(data.row9, 400, p2);
         drawRow(data.row10, 450, p2);
         drawRow(data.row11, 500, p2);
-	console.log(data.ap);
+	//console.log(data.ap);
 	p2.myAvatar.x = data.ap;
     }
 }
@@ -440,9 +446,10 @@ function drawRow(row, y, p) {
 
     }
 */
-
+	//console.log(p);
+	//console.log(p.spaces);
     var x = 25;
-	var rowIndex = 1;
+	var rowIndex = 0;
 	var color;
     for (var i = 0; i < ROWLENGTH; i++) {
        
@@ -473,7 +480,9 @@ function drawRow(row, y, p) {
 		}
 		
 		//p.spaces[i][rowIndex].remove;
-		p.spaces[i][rowIndex] = new component(AVATARW, AVATARH, color, x, y, p);
+
+		//console.log(p.spaces);
+		p.spaces[i][rowIndex].change(color, x, y);
 		x += 50;
 		rowIndex++;
 	       

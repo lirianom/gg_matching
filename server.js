@@ -51,6 +51,10 @@ app.post('/updatescore', function(req, res, next) {
 	routes.updateScore(req,res,connection,r);
 });
 
+app.post('/getRating', function(req, res, next) {
+	routes.getRating(req,res,connection,r);
+});
+
 server.on('connection', function(id) {
 });
 

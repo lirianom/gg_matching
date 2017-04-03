@@ -260,15 +260,27 @@ function initializeButtons() {
 // This unique number is so that peer's cant connect across different games
 function loadGameList() {
 	var gameCount = 0;
-    $.getJSON("/project/game-config.json", function(json) {        
-        json.games.forEach(function(val) {
-            var path = json.host + "/" +  val.name;
-			gameList[path] = gameCount++;
-        });
-    })
+	var rating;
+	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+    $.when( $.getJSON("/project/game-config.json", function(json) {        
+        		json.games.forEach(function(val) {
+            		var path = json.host + "/" +  val.name;
+					gameList[path] = gameCount++;
+        		});
+    		}), 
+			$.ajax({
+				type: "POST",
+				url: "/getRating",
+				data: {"id": id_token},
+				success: function(data) {
+            		console.log("Your Rating is " + data);
+					rating = data.rating;
+        		}
+			})
+	)	
 		.done(function() {
 				
-			peer = PeerInstance(gameList);
+			peer = PeerInstance(gameList, rating);
 			peer.defineHandleData(tempHandleData);
 			peer.defineHandleFrameworkInfo(handleFrameworkInfo);
 			peer.defineHandleGameInfo(handleGameInfo);

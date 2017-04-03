@@ -3,27 +3,30 @@
  */
 
 // New Peer Object
-function PeerInstance(configs) {
+function PeerInstance(configs, rating) {
 "use strict";
 var instance = {};
 var connectedPeers = {};
 
 // Generates a 14 hex digits followed by a -# of the unique game id
-instance.createPeerId = function(gameList) {
+instance.createPeerId = function(gameList,rating) {
     var s = [];
     var hexDigits = "0123456789abcdef";
     for (var i = 0; i < 14; i++) {
         s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
     }
+	
     s[15] = "-" + gameList[window.location.href];
+	s[16] = "-" + rating; // getRating might need to be like singleton pattern
     var peerId = s.join("");
+	console.log(rating);
     console.log(peerId);
     return peerId;
 }
 
-instance.createPeer = function(configs) {
+instance.createPeer = function(configs, rating) {
     var peer = new Peer(
-        this.createPeerId(configs),
+        this.createPeerId(configs, rating),
         {
             host : '/',
             port : 9000,
@@ -60,7 +63,7 @@ instance.createPeer = function(configs) {
     return peer;
 }
 
-instance.peer = instance.createPeer(configs);
+instance.peer = instance.createPeer(configs, rating);
 
 // Returns a list of all the peers connected to the PeerJS server
 instance.getAllConnections = function(res) {
@@ -79,9 +82,17 @@ instance.getPeerIdSubset = function(peerId) {
     return peerId.split("-")[1];
 }
 
+// Might be more efficient to add rating on to unique id
+// expensive to check all users
+// trying to add to peerid so that dont hve to query every1 in queue
+instance.tryRankedConnection = function(listOfUsers) {
+    console.log(gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token);	
+}
+
+
 // Randomly connect to a valid peer
 // Might want to change this to tryRandomConnection
-instance.tryConnection = function(listOfUsers) {
+instance.tryRandomConnection = function(listOfUsers) {
 	var maximum = listOfUsers.length;
 	var minimum = 0;
 	var randomPeer = Math.floor(Math.random() * (maximum - minimum)) + minimum;
@@ -89,6 +100,8 @@ instance.tryConnection = function(listOfUsers) {
 	if (listOfUsers.length == 0 ) console.log("Nothing to connect to.");
 	else instance.createConnection("randomAutoConnection", listOfUsers[randomPeer]);
 }
+
+
 // Displays the peer that you connect to, add them to the connectedPeers list and disconnect from the PeerJS server
 instance.setupConnection = function(c) {
 	$('#rid').val(c.peer);
@@ -127,7 +140,7 @@ instance.attemptConnection = function() {
     // Async Call
     this.peer.listAllPeers( function(res) {
         var listOfUsers = instance.getAllConnections(res);
-        instance.tryConnection(listOfUsers);
+        instance.tryRandomConnection(listOfUsers);
     });
 }
 

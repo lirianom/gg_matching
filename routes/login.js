@@ -3,7 +3,7 @@ module.exports = {
 
 checkAuth: function(req) {
     var token = req.body.id;
-    //  http://stackoverflow.com/questions/34833820/do-we-need-to-hide-the-google-oauth-client-id
+    // http://stackoverflow.com/questions/34833820/do-we-need-to-hide-the-google-oauth-client-id
 	// https://developers.google.com/identity/protocols/OAuth2UserAgent
 
 
@@ -44,7 +44,7 @@ login: function(req,res,connection,r) {
                    	if (err) throw err;
                    	console.log(JSON.stringify(result, null, 2));
                    	if (result.length == 0) {
-						var userObj = {"id":confirmed_id, "win":0,"loss":0}
+						var userObj = {"id":confirmed_id, "win":0,"loss":0, "rating" : 1000}
                        	r.table('users').insert([userObj]).run(connection, function(err, result) {
                            	if (err) throw err;
                            	console.log(JSON.stringify(result, null, 2));
@@ -84,22 +84,32 @@ updateScore: function(req,res,connection,r) {
 	if ( confirmed_id != null) {
 		console.log(typeof(isWinner) + isWinner);
 		if (isWinner == "true") {
-			console.log("test");	
         	r.table('users').get(confirmed_id).update({"win": r.row("win").add(1)}).run(connection,
             	function(err, cursor) {
             	    if (err) throw err;
-                	res.send();
+                	//res.send();
             	}
         	);
+			r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(20)}).run(connection,
+                function(err, cursor) {
+                    if (err) throw err;
+                    // send elo?
+                }
+            );	
 		}
 		else {
-			console.log("test2");
 			r.table('users').get(confirmed_id).update({"loss": r.row("loss").add(1)}).run(connection,
                 function(err, cursor) {
                     if (err) throw err;
-                    res.send();
+                    //res.send();
                 }
             );	
+			r.table('users').get(confirmed_id).update({"rating": r.row("rating").sub(20)}).run(connection,
+				function(err, cursor) {
+					if (err) throw err;
+					// send elo?
+				}
+			);
 
 		}
     };
@@ -107,6 +117,19 @@ updateScore: function(req,res,connection,r) {
     console.log("Updated Score for: " + confirmed_id);
 
 
+},
+
+getRating: function(req,res,connection,r) {
+	var confirmed_id = module.exports.checkAuth(req);
+	if ( confirmed_id != null) {
+		r.table('users').get(confirmed_id).run(connection,
+                function(err, cursor) {
+                    if (err) throw err;
+					console.log("gotta setup this to grab rating")	
+					res.send({"rating":1000});
+                }
+            );
+	}
 }
 
 
