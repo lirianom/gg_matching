@@ -2,7 +2,7 @@ var i;
 var didMove = false;
 
 $(document).ready(function() {
-	Framework.readyUp();
+//	Framework.readyUp();
 	init();
 
 });

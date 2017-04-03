@@ -135,13 +135,13 @@ updateScore: function(req,res,connection,r) {
 getRating: function(req,res,connection,r) {
 	var confirmed_id = module.exports.checkAuth(req);
 	if ( confirmed_id != null) {
-		r.table('users').get(confirmed_id).run(connection,
+		r.table('users').get(confirmed_id).pluck("rating").run(connection,
                 function(err, cursor) {
                     if (err) throw err;
-					console.log("gotta setup this to grab rating")	
-					res.send({"rating":1000});
+					console.log(cursor)	
+					res.send(cursor);
                 }
-            );
+    	);
 	}
 }
 

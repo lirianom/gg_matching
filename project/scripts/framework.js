@@ -4,6 +4,9 @@
 	Required to define own handleData(data) function to interact with data
 	If using countdown you need to define countdownComplete();
 */
+
+isFrameworkSetup = false;
+
 $(document).ready(function() {
 	// duplicate adding this for some reason 
 	// possibly can condense this with login
@@ -23,6 +26,7 @@ function FrameworkInit() {
 			Framework.initializeFramework();
 			$.getScript("project/scripts/copyToClip.js");
 		}
+		else { alert("Sign in"); } 
 	});
 }
 
@@ -131,6 +135,8 @@ Framework.getGame = function() {
 // Sets up connection buttons and text boxes aswell as logging 
 Framework.initializeFramework = function() {
 	//console.log(gapi.auth2.getAuthInstance().isSignedIn.get());
+	isFrameworkSetup = true;
+	Framework.readyUp(); // change to private function maybe?
 	initializeButtons();
 	initializeLogging();
 	loadGameList(); // game config file
@@ -273,7 +279,7 @@ function loadGameList() {
 				url: "/getRating",
 				data: {"id": id_token},
 				success: function(data) {
-            		console.log("Your Rating is " + data);
+            		console.log("Your Rating is " + data.rating);
 					rating = data.rating;
         		}
 			})

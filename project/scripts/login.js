@@ -22,7 +22,7 @@ var onFailure = function(error) {
 function onSignIn(googleUser) {
 	// Useful data for your client-side scripts:
     var profile = googleUser.getBasicProfile();
-    console.log("ID: " + profile.getId()); // Don't send this directly to your server
+    //console.log("ID: " + profile.getId()); // Don't send this directly to your server
     console.log('Full Name: ' + profile.getName());
     //console.log('Given Name: ' + profile.getGivenName());
     //console.log('Family Name: ' + profile.getFamilyName());
@@ -35,7 +35,6 @@ function onSignIn(googleUser) {
 		url: "/login",
 		data: {"id" : id_token},
 		success: function(data) {
-			console.log("login data " + data);
 			if (data[0] != undefined) { 
 				displayUsername(data[0].username);
 			}
@@ -79,10 +78,18 @@ function displayUsername(username) {
     if (username != undefined)
     {
     	$("#nav").prepend("<li id='display_name' class='color_orange'>" + username + "</li>");
-        linkGames();
     }
 	else {
 		console.log("Login Data undefined");
+	}
+
+	if (Framework == undefined) {
+		// home page
+		linkGames();
+	}
+	
+	if (isFrameworkSetup == false) {
+		FrameworkInit();
 	}
 }
 

@@ -3,7 +3,7 @@
 */
 
 $(document).ready(function() {
-	Framework.readyUp(); // to set Ready up button not sure best location fro this yet
+//	Framework.readyUp(); // to set Ready up button not sure best location fro this yet
 	Framework.defineHandleData(recieveData);
 	Framework.defineGame(game);
 	Framework.defineEndGameCleanUp(removeMoves);

@@ -4,7 +4,7 @@
 var myMove;
 
 $(document).ready(function() {
-	Framework.readyUp();
+//	Framework.readyUp();
 	Framework.defineHandleData(handleData);
 	Framework.defineCountdownComplete(countdownComplete);
 	Framework.defineGame(game);

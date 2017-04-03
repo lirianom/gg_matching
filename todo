@@ -4,6 +4,5 @@ https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
 https://hacks.mozilla.org/2016/01/webgl-off-the-main-thread/
 
 
-Verify: null on first conenction - need to retry after login?
 change tryRandomConn to tryRankedConn
 remove ready up button when not logged in

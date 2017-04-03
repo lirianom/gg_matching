@@ -68,7 +68,7 @@ $(document).ready(function() {
     //leftBound = new component(WALLW, AREAH, "purple", 0, 0);
     //rightBound = new component(WALLW, AREAH, "purple", 480, 0);
     //floorBound = new component(AREAW, WALLW, "purple", 0, 550);
-    Framework.readyUp();
+    //Framework.readyUp();
     Framework.defineHandleData(recieveData);
     Framework.defineGame(gameStart);
     Framework.defineInitialState(function(){});
