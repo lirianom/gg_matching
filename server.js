@@ -40,7 +40,7 @@ app.use('/', ExpressPeerServer(server,options));
 app.use("/" + gameConfig.main_directory, express.static(__dirname + '/' + gameConfig.main_directory));
 
 app.post('/login', function(req, res, next) {
-	routes.login(req,res,connection,r);
+	routes.login(req,res,connection,r,0);
 });
 
 app.post('/setupUser', function(req, res, next) {

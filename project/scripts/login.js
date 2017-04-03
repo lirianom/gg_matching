@@ -35,6 +35,7 @@ function onSignIn(googleUser) {
 		url: "/login",
 		data: {"id" : id_token},
 		success: function(data) {
+			console.log("login data " + data);
 			if (data[0] != undefined) { 
 				displayUsername(data[0].username);
 			}

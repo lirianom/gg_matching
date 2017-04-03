@@ -6,7 +6,6 @@ checkAuth: function(req) {
     // http://stackoverflow.com/questions/34833820/do-we-need-to-hide-the-google-oauth-client-id
 	// https://developers.google.com/identity/protocols/OAuth2UserAgent
 
-
 	//https://developers.google.com/identity/protocols/OAuth2
     var CLIENT_ID = "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com";
     var GoogleAuth = require('google-auth-library');
@@ -33,16 +32,30 @@ checkAuth: function(req) {
 
 },
 
-login: function(req,res,connection,r) {
-	confirmed_id = module.exports.checkAuth(req);
-	if (confirmed_id != null) {
+retryLogin: function(req,res,connection,r,limit) {
 		
+	setTimeout(function() {module.exports.login(req,res,connection,r, limit); }, 100);
+},
+
+login: function(req,res,connection,r, limit) {
+	confirmed_id = module.exports.checkAuth(req);
+	if (confirmed_id == null && limit < 10) {
+		console.log(limit);
+		limit = limit + 1;
+		module.exports.retryLogin(req,res,connection,r, limit);		
+	}
+	
+	if (!(limit < 10)) {
+		console.log("Failed to verify login on server within 10 tries.");
+	}
+
+	if (confirmed_id != null) {
 		r.table('users').filter({"id":confirmed_id}).run(connection,
            	function(err, cursor) {
                	if (err) throw err;
                	cursor.toArray(function(err, result) {
                    	if (err) throw err;
-                   	console.log(JSON.stringify(result, null, 2));
+                   	//console.log(JSON.stringify(result, null, 2));
                    	if (result.length == 0) {
 						var userObj = {"id":confirmed_id, "win":0,"loss":0, "rating" : 1000}
                        	r.table('users').insert([userObj]).run(connection, function(err, result) {
@@ -58,7 +71,7 @@ login: function(req,res,connection,r) {
                	});
           	}
     	);
-	};
+	}
 },
 
 
