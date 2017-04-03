@@ -196,7 +196,13 @@ Framework.forceEndCountdown = function() {
 	//Framework.sendData({"type":"FrameworkInfo","callFunction":"forceEndCountdown"});
 }
 
-
+Framework.onLogout = function() {
+	$(".connection_bar").html("");
+	$(".log").html("");
+	isFrameworkSetup = false;
+	peer.destroy();
+	
+}
 /*
 	Private functions only can be called internally
 */
@@ -296,6 +302,7 @@ function loadGameList() {
 			console.log("Error: Failed to load Game List");
 		});
 }
+
 
 // Handles communication for the framework between clients
 function handleFrameworkInfo(data) {

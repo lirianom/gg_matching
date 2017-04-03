@@ -1,8 +1,6 @@
-make it so you cant readyUp till connected
 https://www.airpair.com/javascript/posts/using-rethinkdb-with-expressjs
 https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
 https://hacks.mozilla.org/2016/01/webgl-off-the-main-thread/
 
 
 change tryRandomConn to tryRankedConn
-remove ready up button when not logged in

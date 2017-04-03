@@ -19,8 +19,8 @@ instance.createPeerId = function(gameList,rating) {
     s[15] = "-" + gameList[window.location.href];
 	s[16] = "-" + rating; // getRating might need to be like singleton pattern
     var peerId = s.join("");
-	console.log(rating);
-    console.log(peerId);
+	//console.log(rating);
+    //console.log(peerId);
     return peerId;
 }
 
@@ -82,11 +82,16 @@ instance.getPeerIdSubset = function(peerId) {
     return peerId.split("-")[1];
 }
 
+instance.getRating = function(peerId) {
+	return peerId.split("-")[2];
+}
+
 // Might be more efficient to add rating on to unique id
 // expensive to check all users
 // trying to add to peerid so that dont hve to query every1 in queue
 instance.tryRankedConnection = function(listOfUsers) {
     console.log(gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token);	
+		
 }
 
 
@@ -234,6 +239,13 @@ window.onunload = window.onbeforeunload = function(e) {
     if (!!instance.peer && !instance.peer.destroyed) {
     	instance.peer.destroy();
 	}
+};
+
+instance.destroy = function(e) {
+	if (!!instance.peer && !instance.peer.destroyed) {
+        instance.peer.destroy();
+		console.log("Disconnected from peer instance.");
+    }	
 };
 
 return instance;
