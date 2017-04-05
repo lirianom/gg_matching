@@ -1,3 +1,15 @@
+function calculateRatingGain(myRating, opponentRating, myGameResult) {
+    if ([0, 0.5, 1].indexOf(myGameResult) === -1) {
+      	return null;
+    }
+    
+   	var myChanceToWin = 1 / ( 1 + Math.pow(10, (opponentRating - myRating) / 400));
+	console.log( Math.round(32 * (myGameResult - myChanceToWin)) );
+  	return Math.round(32 * (myGameResult - myChanceToWin));
+}
+
+
+
 
 module.exports = {
 
@@ -88,31 +100,37 @@ setupUser: function(req,res,connection,r) {
 updateScore: function(req,res,connection,r) {
 	var isWinner = req.body.isWinner;
 	var confirmed_id = module.exports.checkAuth(req);
-	console.log(isWinner);
+	
+	var ratingGain;
+
 	if ( confirmed_id != null) {
 		console.log(typeof(isWinner) + isWinner);
+		// For ties might want to not increment wins or loss ? or maybe add tie field
 		if (isWinner == "true") {
+			ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, 1);
         	r.table('users').get(confirmed_id).update({"win": r.row("win").add(1)}).run(connection,
             	function(err, cursor) {
             	    if (err) throw err;
-                	//res.send();
             	}
         	);
-			r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(20)}).run(connection,
+			r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
                 function(err, cursor) {
                     if (err) throw err;
-                    // send elo?
+					theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, 0);
+					res.send({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain});
                 }
             );	
 		}
 		else {
+			ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, 0);
 			r.table('users').get(confirmed_id).update({"loss": r.row("loss").add(1)}).run(connection,
                 function(err, cursor) {
                     if (err) throw err;
-                    //res.send();
+					theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, 1);
+                    res.send({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain});
                 }
             );	
-			r.table('users').get(confirmed_id).update({"rating": r.row("rating").sub(20)}).run(connection,
+			r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
 				function(err, cursor) {
 					if (err) throw err;
 					// send elo?
@@ -128,7 +146,7 @@ updateScore: function(req,res,connection,r) {
 },
 
 retryGetRating: function(req,res,connection,r,limit) {
-
+	// Can improve this similar to enterRankedConnectionQueue
     setTimeout(function() {module.exports.getRating(req,res,connection,r, limit); }, 100);
 },
 

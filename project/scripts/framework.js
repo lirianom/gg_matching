@@ -120,12 +120,14 @@ Framework.readyUp = function() {
 	$(".connection_bar").append("<hr>");
 
     $("#readyUp").on("click", function() {
-		addToReadyList(Framework.getPeerId());
-		peer.askForPeersToAgree("readyUp");
-		startGame(readyList);	
+		if (peer.isConnected()) {
+			addToReadyList(Framework.getPeerId());
+			peer.askForPeersToAgree("readyUp");
+			startGame(readyList);	
 		
-		$("#readyUp").off();
-		$("#readyUp").remove();
+			$("#readyUp").off();
+			$("#readyUp").remove();
+		}
     });
 }
 
@@ -151,6 +153,10 @@ Framework.rematch = function() {
 	initializeRematch();
 	//Framework.sendData({"type":"FrameworkInfo","callFunction":"rematch"});
 	
+}
+
+Framework.getRating = function(peerId) {
+	return peer.getRating(peerId);
 }
 
 // Return the PeerId even if they are disconnected

@@ -11,14 +11,16 @@ function Game(readyList) { // Constructor
 
 	var player1;
     var player2;
-    
+    var player1_rating;
+	var player2_rating;
+
 	var playerCurrentTurn;
 	var gameOver = false;
     var turnBased = false;
     var allowMoves = false;
     this.setPlayer1(readyList[0]);
     this.setPlayer2(readyList[1]);
-
+	
 	var winner;
 }
 
@@ -30,11 +32,13 @@ Game.prototype.initializeTurnGame = function() {
 
 Game.prototype.setPlayer1 = function(id) {
     this.player1 = id;
+	this.player1_rating = Framework.getRating(id);
     console.log("Player 1 = " + this.player1);
 }
 
 Game.prototype.setPlayer2 = function(id) {
     this.player2 = id;
+	this.player2_rating = Framework.getRating(id);
     console.log("Player 2 = " + id);
 }
 
@@ -93,20 +97,67 @@ Game.prototype.setAllowMoves = function(val) {
 Game.prototype._setClientGameOver = function() {
 	var isWinner = false;
 	this.gameOver = true;
+	
 	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 	Framework.endGameCleanUp();
 	if (this.winner == Framework.getPeerId())
 	{
 		isWinner = true;	
 	}
+
+	var myRating;
+	var theirRating;	
+
+	if (Framework.getPeerId()  == this.player1) {
+		theirRating = this.player2_rating;
+		myRating = this.player1_rating;
+	}
+	else {
+		theirRating = this.player1_rating;
+		myRating = this.player2_rating;
+	}
+	console.log(this.player2_rating);
+
+	var self = this;
 	$.ajax({
 		type: "POST",
 		url: "/updateScore",
-		data: {"id": id_token,"isWinner":isWinner},
+		data: {"id": id_token,"isWinner":isWinner, "myRating":myRating, "theirRating":theirRating},
 		success: function(data) {
-			console.log("Updated Score");
+			console.log("Updated Stats");
+			if (Framework.getPeerId() == self.player1) {
+				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.myRatingGain);
+				self.player2_rating =  parseInt(self.player2_rating) +  parseInt(data.theirRatingGain);
+			}
+			else {
+				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.theirRatingGain);
+                self.player2_rating =  parseInt(self.player2_rating) + parseInt(data.myRatingGain);
+			}
+			console.log(self.player1_rating);
+			console.log(self.player2_rating);
 		}
 	});
+}
+
+function handleUpdateScoreResults(data) {
+	console.log("Updated Stats");
+	console.log(Game);
+	Game.adjustRating(data);
+}
+
+Game.prototype.adjustRating = function(data) {
+
+    if (Framework.getPeerId() == this.player1) {
+        this.player1_rating += parseInt(data.myRatingGain);
+        this.player2_rating += parseInt(data.theirRatingGain);
+    }
+    else {
+        this.player1_rating += parseInt(data.theirRatingGain);
+     	this.player2_rating += parseInt(data.myRatingGain);
+  	}
+    console.log(this.player1_rating);
+    console.log(this.player2_rating);
+
 }
 
 Game.prototype.setWinner = function(id) {

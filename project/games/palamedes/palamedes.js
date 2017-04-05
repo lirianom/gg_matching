@@ -2,8 +2,8 @@ const BLOCKSPEED = 10;
 const MOVESPEED = 50;
 const AREAW = 500;
 const AREAH = 700;
-const AVATARW = 50;
-const AVATARH = 50;
+const AVATARW = 40;
+const AVATARH = 40;
 const COLLENGTH = 10;
 const WALLW = 20;
 const ROWLENGTH = 9;
@@ -30,7 +30,16 @@ var max;
 var p1;
 var p2;
 var position;
-var shot;
+var shotLibrary = new Array(6);
+shotLibrary[0] = "blue";
+shotLibrary[1] = "green";
+shotLibrary[2] = "orange";
+shotLibrary[3] = "pink";
+shotLibrary[4] = "yellow";
+shotLibrary[5] = "brown";
+shotLibrary[6] = "grey";
+var shot = shotLibrary[0];
+
 //var rowWorker = new Worker('workRow.js');
 
 function Queue() {
@@ -95,6 +104,9 @@ function myGameArea(ri, iq, r, temp)  {
         var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
         var rightBound = new component(WALLW, AREAH, "purple", 480, 0, this);
         var floorBound = new component(AREAW, WALLW, "purple", 0, 550, this);
+		instance.blank = new component(AVATARW, AVATARH, "grey", 25, 620, this);
+		instance.loadedShot = new component(AVATARW, AVATARH, shot, 225, 500, this);
+		/*
 		instance.spaces = new Array(11);
 		for (var i = 0; i < 11; i++) {
 			instance.spaces[i] = new Array(9);
@@ -105,7 +117,8 @@ function myGameArea(ri, iq, r, temp)  {
 				instance.spaces[i][j] = new component(AVATARW, AVATARH, "grey", 10000, 10000, this);
 				//instance.spaces[i][j] = 1;
 			}
-		}  
+		}
+		*/  
         //array = new int[][];
         min = Math.ceil(CEIL);
         max = Math.floor(FLOOR);
@@ -184,26 +197,50 @@ function readInput(instance) {
     var keyCode = e.keyCode;
     if (keyCode == 37) {
         instance.myAvatar.x -= 50;
+		instance.loadedShot.x -= 50;
     }
     if (keyCode == 39) {
         instance.myAvatar.x += 50;
+		instance.loadedShot.x += 50;
     }
     if (keyCode == 38) {
 	shootProjectile();
     }
     if (keyCode == 40) {
-	swapShot();
+	swapShot(instance);
     }
     });
 
 }
 
 function shootProjectile() {
-        
+			        
 }
 
-function swapShot() {
-
+function swapShot(instance) {
+	switch(shot) {
+        case shotLibrary[0] :
+            shot = shotLibrary[1];
+            break;
+        case shotLibrary[1] :
+            shot = shotLibrary[2];
+            break;
+        case shotLibrary[2] :
+            shot = shotLibrary[3];
+            break;
+        case shotLibrary[3] :
+            shot = shotLibrary[4];
+            break;
+        case shotLibrary[4] :
+            shot = shotLibrary[5];
+            break;
+        case shotLibrary[5] :
+            shot = shotLibrary[0];
+            break;
+        default :
+            break;
+    }
+	instance.loadedShot.color = shot;
 }
 
 function initializeQueue(queue) {
@@ -272,16 +309,22 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
     leftBound.update();
     rightBound.update();
     floorBound.update();
+	p.blank.update();
+	p.loadedShot.update();
+	/*
 	for (var i = 0; i < 11; i++) {
 		for (var j = 0; j < 9; j++) {
 			p.spaces[i][j].update();
 		}
 	}
+	*/
     if (myAvatar.x < 25) {
         myAvatar.x = 25;
+		p.loadedShot.x = 25;
     }
     if (myAvatar.x > 425) {
         myAvatar.x = 425;
+		p.loadedShot.x = 425;
     }
     /*
     if (myAvatar.crashWith(leftBound)) {
@@ -380,11 +423,19 @@ function rows(p, queue) {
     count += 1;
     if (count == 50) {
         insertRow(queue);
+		checkMatch(p);
         count = 0; 
     }
 
 }
 
+function checkMatch(p) {
+	var ctx = p.canvas.getContext("2d");
+	var matcher = ctx.rect(p.loadedShot.x, p.loadedShot.y + 50, 50, 50);
+	if (matcher.getContext()) {
+		console.log("yeh");
+	} 
+}
 
 function makeRow(min, max) {
     var a = new Array(ROWLENGTH);
@@ -422,7 +473,7 @@ function insertRow(queue) {
 //var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
 
 function drawRow(row, y, p) {
-/*
+
     var x = 25;
     ctx = p.context;
     for (var i = 0; i < ROWLENGTH; i++) {
@@ -440,12 +491,13 @@ function drawRow(row, y, p) {
         } else if (row[i] == 6) {
             ctx.fillStyle = "green";
         }
-        ctx.fillRect(x, y, 50, 50);
+        ctx.fillRect(x, y, AVATARW, AVATARH);
         }
         x += 50;
 
     }
-*/
+
+/*
 	//console.log(p);
 	//console.log(p.spaces);
     var x = 25;
@@ -482,13 +534,15 @@ function drawRow(row, y, p) {
 		//p.spaces[i][rowIndex].remove;
 
 		//console.log(p.spaces);
-		p.spaces[i][rowIndex].change(color, x, y);
+		//p.spaces[i][rowIndex].change(color, x, y);
 		x += 50;
 		rowIndex++;
 	       
     }
 
+*/
 }
+
 
 function endGame() {
 }
