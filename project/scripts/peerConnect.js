@@ -19,8 +19,6 @@ instance.createPeerId = function(gameList,rating) {
     s[15] = "-" + gameList[window.location.href];
 	s[16] = "-" + rating; // getRating might need to be like singleton pattern
     var peerId = s.join("");
-	//console.log(rating);
-    //console.log(peerId);
     return peerId;
 }
 
@@ -66,14 +64,14 @@ instance.createPeer = function(configs, rating) {
 instance.peer = instance.createPeer(configs, rating);
 
 // Returns a list of all the peers connected to the PeerJS server
-instance.getAllConnections = function(res) {
+instance.getAllConnectionsWithinRange = function(res, range) {
 	var listOfUsers = [];
 	for (var i = 0, ii = res.length; i < ii; i += 1) {
-        if (res[i] != instance.peer.id && instance.getPeerIdSubset(instance.peer.id) == instance.getPeerIdSubset(res[i])) {
+        if (res[i] != instance.peer.id && instance.getPeerIdSubset(instance.peer.id) == instance.getPeerIdSubset(res[i]) 
+			&& (Math.abs(instance.getRating(res[i]) - instance.getRating(instance.peer.id)) <= range) ) {
 			listOfUsers.push(res[i]); 
         }
     } 
-	//console.log(listOfUsers);
 	return listOfUsers;
 }
 
@@ -86,14 +84,46 @@ instance.getRating = function(peerId) {
 	return peerId.split("-")[2];
 }
 
-// Might be more efficient to add rating on to unique id
-// expensive to check all users
-// trying to add to peerid so that dont hve to query every1 in queue
+// Issue with negative ratings
 instance.tryRankedConnection = function(listOfUsers) {
-    console.log(gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token);	
+	// Start by selecting closet peer then factor in a wait time to select best
+	// Could make it so that when getPeerIdSubset is called we filter out larger values and have a subset based on rank + game
+	var myRating = instance.getRating(instance.peer.id);
+	var theirId = null;
+	$.each(listOfUsers, function( index, value) {
+		if (theirId == null || Math.abs(instance.getRating(value) - myRating) < Math.abs(instance.getRating(theirId) - myRating)) {
+			theirId = value;
+		}
+	});
+
+	if (listOfUsers.length == 0 ) console.log("Nothing to connect to within range. Widening search range.");
+    else {
+		instance.createConnection("rankedAutoConnection", theirId);
 		
+	}
 }
 
+// Uses instance.tryRankedConnection to get cloesest peer's but trys multiple times with multiple ranges
+instance.enterRankedConnectionQueue = function() {
+
+	var timeOutArray = [];	
+
+	for ( var i = 0; i <= 10; i++ ) {
+		(function(j) {
+			timeOutArray[j] = setTimeout(function() {
+				instance.attemptConnection(j*100);
+			}, j*1000);				 
+		})(i);
+	}
+	
+	setTimeout( function () { 
+		instance.attemptConnection(100);
+	} , 1000);
+	setTimeout( function() {
+		instance.attemptConnection(1000);
+	}, 5000);
+	
+}
 
 // Randomly connect to a valid peer
 // Might want to change this to tryRandomConnection
@@ -130,7 +160,6 @@ instance.createConnection = function(labelVal, requestedPeer) {
 // Not being used right now - replaced by getAllConnections
 instance.autoConnection = function(res) {	
 	for (var i = 0, ii = res.length; i < ii; i += 1) {
-		console.log(res[i]);
 		if (res[i] != this.peer.id) {
 			$("#rid").val(res[i]);
 			this.createConnection("autoConnection");
@@ -141,12 +170,15 @@ instance.autoConnection = function(res) {
 }
 
 // Try to find a valid peer to connect to and connect
-instance.attemptConnection = function() {
+instance.attemptConnection = function(range) {
     // Async Call
-    this.peer.listAllPeers( function(res) {
-        var listOfUsers = instance.getAllConnections(res);
-        instance.tryRandomConnection(listOfUsers);
-    });
+    if (!instance.isConnected()) {
+		this.peer.listAllPeers( function(res) {
+        	var listOfUsers = instance.getAllConnectionsWithinRange(res, range);
+        	//instance.tryRandomConnection(listOfUsers);
+			instance.tryRankedConnection(listOfUsers);
+    	});
+	}
 }
 
 // Return PeerId for a client that is connected or disconnected from the Express Server
@@ -195,7 +227,6 @@ instance.defineHandleGameInfo = function(func) {
 // Define handle data that gets created by the game
 instance.handleData = function () { throw new Error("handleData(data) is not defined use defineHandleData(func)"); }
 instance.defineHandleData = function(func) {
-	//console.log(func);
     if (func !== 'undefined' && typeof func === 'function') {
         instance.handleData = func;
     }

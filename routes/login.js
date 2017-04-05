@@ -15,16 +15,11 @@ checkAuth: function(req) {
     client.verifyIdToken(
         token,
         CLIENT_ID,
-        // Or, if multiple clients access the backend:
-        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3],
         function(e, login) {
 
             var payload = login.getPayload();
             userid = payload['sub'];
-            // check if valid
             //https://developers.google.com/identity/sign-in/web/backend-auth
-            //If request specified a G Suite domain:
-            //var domain = payload['hd'];
         }
     );
     console.log("Verify: " + userid);
@@ -132,13 +127,29 @@ updateScore: function(req,res,connection,r) {
 
 },
 
-getRating: function(req,res,connection,r) {
+retryGetRating: function(req,res,connection,r,limit) {
+
+    setTimeout(function() {module.exports.getRating(req,res,connection,r, limit); }, 100);
+},
+
+getRating: function(req,res,connection,r, limit) {
 	var confirmed_id = module.exports.checkAuth(req);
+	
+	if (confirmed_id == null && limit < 10) {
+        console.log(limit);
+        limit = limit + 1;
+        module.exports.retryGetRating(req,res,connection,r, limit);
+    }
+
+    if (!(limit < 10)) {
+        console.log("Failed to retrieve rating on server within 10 tries.");
+    }
+
 	if ( confirmed_id != null) {
 		r.table('users').get(confirmed_id).pluck("rating").run(connection,
                 function(err, cursor) {
                     if (err) throw err;
-					console.log(cursor)	
+			//		console.log(cursor)	
 					res.send(cursor);
                 }
     	);

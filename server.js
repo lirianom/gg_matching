@@ -47,12 +47,12 @@ app.post('/setupUser', function(req, res, next) {
 	routes.setupUser(req,res,connection,r);
 });
 
-app.post('/updatescore', function(req, res, next) {
+app.post('/updateScore', function(req, res, next) {
 	routes.updateScore(req,res,connection,r);
 });
 
 app.post('/getRating', function(req, res, next) {
-	routes.getRating(req,res,connection,r);
+	routes.getRating(req,res,connection,r,0);
 });
 
 server.on('connection', function(id) {

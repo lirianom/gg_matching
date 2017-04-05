@@ -52,7 +52,7 @@ function signOut() {
    	auth2.signOut().then(function () {
    		console.log('User signed out.');
    	});
-	Framework.onLogout();	
+	if (Framework != undefined) Framework.onLogout();	
 	auth2.disconnect();
 			
 }
@@ -77,19 +77,22 @@ function setUsername(id_token, profile) {
 function displayUsername(username) {
     if (username != undefined)
     {
-    	$("#nav").prepend("<li id='display_name' class='color_orange'>" + username + "</li>");
+		if ($("#display_name").length != 1) {
+    		$("#nav").prepend("<li id='display_name' class='color_orange'>" + username + "</li>");
+		}
     }
 	else {
 		console.log("Login Data undefined");
 	}
 
-	if (Framework == undefined) {
+	if (typeof(Framework) == "undefined") {
 		// home page
 		linkGames();
 	}
-	
-	if (isFrameworkSetup == false) {
-		FrameworkInit();
+	if (typeof(Framework) != "undefined") {
+		if (isFrameworkSetup == false) {
+			FrameworkInit();
+		}
 	}
 }
 

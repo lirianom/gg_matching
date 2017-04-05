@@ -14,19 +14,23 @@ $(document).ready(function() {
 	$.getScript("https://apis.google.com/js/platform.js").then(FrameworkInit);
 });
 
+var loadedLoginInfo = false;
 function FrameworkInit() {
 	// used when changing from default page to game
 	// need to set this up so it checks if they login on the page or could just prohibit that
 	// maybe redirect back to home page if not logged in
 	gapi.auth2.init({client_id : "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com"})
-	.then(function() {
-		var logged_in = gapi.auth2.getAuthInstance().isSignedIn.get();
-		console.log("Logged in is: " + logged_in);	
-		if (logged_in) {
-			Framework.initializeFramework();
-			$.getScript("project/scripts/copyToClip.js");
+	.then(function(authResults) {
+		if (!loadedLoginInfo) {
+			loadedLoginInfo = true;
+			var logged_in = gapi.auth2.getAuthInstance().isSignedIn.get();
+			console.log("Logged in is: " + logged_in);	
+			if (logged_in) {
+				Framework.initializeFramework();
+				$.getScript("project/scripts/copyToClip.js");
+			}
+			else { alert("Sign in"); } 
 		}
-		else { alert("Sign in"); } 
 	});
 }
 
@@ -139,7 +143,7 @@ Framework.initializeFramework = function() {
 	Framework.readyUp(); // change to private function maybe?
 	initializeButtons();
 	initializeLogging();
-	loadGameList(); // game config file
+	loadGameInfo(); // game config file
 }
 
 // Public rematch function calls the private rematch function and alerts the clients peer to call it aswell
@@ -258,7 +262,7 @@ function initializeButtons() {
     	peer.createConnection("manualConnection",$("#rid").val());
     });
     $('#autoConnect').click(function() {
-    	peer.attemptConnection();
+    	peer.enterRankedConnectionQueue();
     });
 
 }
@@ -270,7 +274,7 @@ function initializeButtons() {
 
 // Reads from the game-config.json file and creates a unique number for each game
 // This unique number is so that peer's cant connect across different games
-function loadGameList() {
+function loadGameInfo() {
 	var gameCount = 0;
 	var rating;
 	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
