@@ -8,16 +8,11 @@
 isFrameworkSetup = false;
 
 $(document).ready(function() {
-	// duplicate adding this for some reason 
-	// possibly can condense this with login
-	//$(document).append('<script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>');
 	$.getScript("https://apis.google.com/js/platform.js").then(FrameworkInit);
 });
 
 var loadedLoginInfo = false;
 function FrameworkInit() {
-	// used when changing from default page to game
-	// need to set this up so it checks if they login on the page or could just prohibit that
 	// maybe redirect back to home page if not logged in
 	gapi.auth2.init({client_id : "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com"})
 	.then(function(authResults) {
@@ -29,7 +24,7 @@ function FrameworkInit() {
 				Framework.initializeFramework();
 				$.getScript("project/scripts/copyToClip.js");
 			}
-			else { alert("Sign in"); } 
+			else { window.location.href = "http://adb07.cs.appstate.edu:9000" } 
 		}
 	});
 }
@@ -140,7 +135,6 @@ Framework.getGame = function() {
 
 // Sets up connection buttons and text boxes aswell as logging 
 Framework.initializeFramework = function() {
-	//console.log(gapi.auth2.getAuthInstance().isSignedIn.get());
 	isFrameworkSetup = true;
 	Framework.readyUp(); // change to private function maybe?
 	initializeButtons();
@@ -151,8 +145,6 @@ Framework.initializeFramework = function() {
 // Public rematch function calls the private rematch function and alerts the clients peer to call it aswell
 Framework.rematch = function() {
 	initializeRematch();
-	//Framework.sendData({"type":"FrameworkInfo","callFunction":"rematch"});
-	
 }
 
 Framework.getRating = function(peerId) {
@@ -172,7 +164,6 @@ Framework.toggleRatingDisplay = function(rating) {
 	else if ($("#rating").length != 1) {
             $("#nav").prepend("<li id='rating' class='color_orange'>" + rating + "</li>");
     }
-	
 }
 
 Framework.updateRatingDisplay = function(rating) {
@@ -187,7 +178,6 @@ Framework.getPeerId = function() {
 // Sends passed data to every connected peer
 Framework.sendData = function(data) {
     peer.eachActiveConnection(function(c,$c) {
-		data.time = (new Date()).getTime();
         c.send(data);
     });
 }
@@ -221,9 +211,7 @@ Framework.countdown = function() {
 
 // Calls the private _forceEndCountdown() function and tells the other peer to do the same
 Framework.forceEndCountdown = function() {
-	//_forceEndCountdown();
 	callFunction("forceEndCountdown",_forceEndCountdown);
-	//Framework.sendData({"type":"FrameworkInfo","callFunction":"forceEndCountdown"});
 }
 
 Framework.onLogout = function() {
@@ -231,8 +219,8 @@ Framework.onLogout = function() {
 	$(".log").html("");
 	isFrameworkSetup = false;
 	peer.destroy();
-	
 }
+
 /*
 	Private functions only can be called internally
 */
@@ -244,8 +232,6 @@ function callFunction(name, func) {
 }
 
 function initializeRematch() { 
-	//Framework.sendData({"type":"FrameworkInfo","callFunction":"initializeRematch"});
-	//_initializeRematch();
 	callFunction("initializeRematch", _initializeRematch);
 }
 
@@ -336,7 +322,6 @@ function loadGameInfo() {
 		});
 }
 
-
 // Handles communication for the framework between clients
 function handleFrameworkInfo(data) {
     if (data.callFunction == "forceEndCountdown") {
@@ -373,11 +358,8 @@ function handleGameInfo(data) {
 // Creates a GameInstance and calls the defined game method
 function startGame(readyList) {
     if (readyList.length == 2) {
-        // GameInstance is singleton pattern now so it can only be used once but if something
-        // makes a GameInstance before this method it will use that one.
         globalGame = new GameInstance(readyList);
         initialState();
-        console.log(JSON.stringify(globalGame));
         game();
     }
 }
@@ -407,10 +389,18 @@ function _forceEndCountdown() {
     stopCountdownWorker();
 }
 
-// Not sure what this is for
-function setCountdownWorker(w) {
-	
-}
+
+$(window).on('unload', function() {
+	/*if (globalGame != undefined) {
+ 	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;		
+	var gameId = Framework.getGameId();
+	$.ajax({
+        type: "POST",
+        url: "/forfiet",
+        data: {"id": id_token, "gameId": gameId}
+    });
+	}*/
+});
 
 // Framework object that can access all the public methods
 return Framework;

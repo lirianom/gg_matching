@@ -55,6 +55,11 @@ app.post('/getRating', function(req, res, next) {
 	routes.getRating(req,res,connection,r,0);
 });
 
+app.post('/forfeitt', function(req, res, next) {
+    routes.forfiet(req,res,connection,r, 0 );
+});
+
+
 server.on('connection', function(id) {
 });
 

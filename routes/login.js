@@ -240,7 +240,57 @@ getRating: function(req,res,connection,r, limit) {
 			}
 			);
 	}
-}
+},
 
+retryForfiet: function(req,res,connection,r,limit) {
+	setTimeout(function() {module.exports.forfiet(req,res,connection,r,limit);},100);
+},
+
+forfiet: function(req,res,connection,r,limit) {
+	console.log("FORFIET");
+	var confirmed_id = module.exports.checkAuth(req);
+	var gameId = req.body.gameId;
+	if (confirmed_id == null && limit < 10) {
+        limit = limit + 1;
+        module.exports.retryForfiet(req,res,connection,r, limit);
+    }
+
+    if (!(limit < 10)) {
+        console.log("Failed to process forfiet on server within 10 tries.");
+    }
+
+ 	if ( confirmed_id != null) {
+        r.table('users').get(confirmed_id).hasFields(gameId).run(connection,
+            function(err, cursor) {
+                if (err) throw err;
+                if (cursor == true) {
+					r.table("users").get(confirmed_id)(gameId)("rating").run(connection,
+        				function( err, cursor) {
+            				if (err) throw err;			
+							var eloLoss = 50;		
+							if (parseInt(cursor) - eloLoss < 1) {
+								eloLost = parseInt(cursor);
+							}
+							var query = "{\"" + gameId + "\":{\"rating\":" + parseInt(cursor - eloLoss) + "}}";
+							query = JSON.parse(query);
+						
+                    		r.table('users').get(confirmed_id).update(query).run(connection,
+                        		function(err, cursor) {
+                            		if (err) throw err;
+                            		res.send({"rating":cursor});
+                        		}
+                    		);
+						}
+					);
+
+                }
+
+            }
+    	);
+    }
+	
+	
+
+}
 
 }

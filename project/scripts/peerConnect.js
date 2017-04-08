@@ -8,7 +8,7 @@ function PeerInstance(configs, rating) {
 var instance = {};
 var connectedPeers = {};
 
-// Generates a 14 hex digits followed by a -# of the unique game id
+// Generates a 14 hex digits followed by a -# of the unique game id and -# for the peer's rating
 instance.createPeerId = function(gameList,rating) {
     var s = [];
     var hexDigits = "0123456789abcdef";
@@ -17,7 +17,7 @@ instance.createPeerId = function(gameList,rating) {
     }
 	
     s[15] = "-" + gameList[window.location.href];
-	s[16] = "-" + rating; // getRating might need to be like singleton pattern
+	s[16] = "-" + rating; 
     var peerId = s.join("");
     return peerId;
 }
@@ -86,8 +86,6 @@ instance.getRating = function(peerId) {
 
 // Issue with negative ratings
 instance.tryRankedConnection = function(listOfUsers) {
-	// Start by selecting closet peer then factor in a wait time to select best
-	// Could make it so that when getPeerIdSubset is called we filter out larger values and have a subset based on rank + game
 	var myRating = instance.getRating(instance.peer.id);
 	var theirId = null;
 	$.each(listOfUsers, function( index, value) {
@@ -105,9 +103,7 @@ instance.tryRankedConnection = function(listOfUsers) {
 
 // Uses instance.tryRankedConnection to get cloesest peer's but trys multiple times with multiple ranges
 instance.enterRankedConnectionQueue = function() {
-
 	var timeOutArray = [];	
-
 	for ( var i = 0; i <= 10; i++ ) {
 		(function(j) {
 			timeOutArray[j] = setTimeout(function() {
@@ -131,7 +127,6 @@ instance.tryRandomConnection = function(listOfUsers) {
 	var maximum = listOfUsers.length;
 	var minimum = 0;
 	var randomPeer = Math.floor(Math.random() * (maximum - minimum)) + minimum;
-	// Handle this better in the future
 	if (listOfUsers.length == 0 ) console.log("Nothing to connect to.");
 	else instance.createConnection("randomAutoConnection", listOfUsers[randomPeer]);
 }
@@ -202,7 +197,6 @@ instance.connect = function(c) {
 // the appropriate functions
 instance.onData = function(c,data) {
         $("#active").append(data + c.label + "<br>");
-        // Potentially combine with waitForTurn
 		if (data.type == "FrameworkInfo") {
 			this.handleFrameworkInfo(data);
 		}

@@ -1,7 +1,3 @@
-
-//http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
-// try using this to include game in framework
-// Not sure how to include http://www.adequatelygood.com/JavaScript-Module-Pattern-In-Depth.html
 var GameInstance = (function(readyList) {
 "use strict";
 var instance;
@@ -50,7 +46,6 @@ Game.prototype.getPlayer2 = function() {
     return this.player2;
 }
 
-// Issue with naming 
 Game.prototype.currentTurn = function() {
 	if (this.getGameOver()) { throw new Error("currentTurn() cant be called when game is over"); }
     return this.playerCurrentTurn;
@@ -62,7 +57,6 @@ Game.prototype.nextPlayer = function() {
 	else return this.player1;
 }
 
-// Somehow make this private
 Game.prototype._endClientTurn = function() {
 	if (this.getGameOver()) { throw new Error("_endClientTurn() cant be called when game is over"); }
     if (this.currentTurn() == this.player1) this.playerCurrentTurn = this.player2;
@@ -93,7 +87,6 @@ Game.prototype.setAllowMoves = function(val) {
 	this.allowMoves = val;
 }
 
-// make private
 Game.prototype._setClientGameOver = function() {
 	var result = 0;
 	this.gameOver = true;
@@ -142,6 +135,7 @@ Game.prototype._setClientGameOver = function() {
 }
 
 Game.prototype.setWinner = function(id) {
+	console.log("set winner");
 	this.winner = id;
 }
 
@@ -155,8 +149,6 @@ Game.prototype.getGameOver = function() {
 }
 
 Game.prototype._rematch = function() {
-	// Might want to create method to intialize startup stuff 
-	console.log("game rematch");
 	this.gameOver = false;
 	this.winner = undefined;
 }
@@ -164,7 +156,6 @@ Game.prototype._rematch = function() {
 Game.prototype.rematch = function() {
 	if (!this.gameOver) { throw new Error("rematch() cant be called when game is not over use setGameOver()"); }
 	this._rematch();
-	//Framework.sendData({"type":"gameInfo", "rematch":true});
 }
 
 function throwError(func, msg) {

@@ -45,6 +45,7 @@ var sampleP;
 var sampleO;
 var sampleBl;
 var sampleG;
+var shotFlag;
 
 //var rowWorker = new Worker('workRow.js');
 
@@ -112,6 +113,7 @@ function myGameArea(ri, iq, r, temp)  {
         var floorBound = new component(AREAW, WALLW, "purple", 0, 550, this);
 		instance.blank = new component(AVATARW, AVATARH, "grey", 25, 620, this);
 		instance.loadedShot = new component(AVATARW, AVATARH, shot, 225, 500, this);
+		shotFlag = 0;
 		/*
 		instance.spaces = new Array(11);
 		for (var i = 0; i < 11; i++) {
@@ -154,8 +156,26 @@ function myGameArea(ri, iq, r, temp)  {
             row10[i] = 0;
             row11[i] = 0;
         }
-		var ctx = this.context;
-		ctx.fillStyle = "brown"
+		
+		var ctx = this.canvas.getContext("2d");
+		ctx.fillStyle = "brown";
+		ctx.fillRect(25, 570, AVATARW, AVATARH);
+        sampleBr = ctx.getImageData(25, 570, AVATARW, AVATARH);
+	    ctx.fillStyle = "yellow";
+        ctx.fillRect(25, 570, AVATARW, AVATARH);
+        sampleY = ctx.getImageData(25, 570, AVATARW, AVATARH);
+        ctx.fillStyle = "blue";
+        ctx.fillRect(25, 570, AVATARW, AVATARH);
+        sampleBl = ctx.getImageData(25, 570, AVATARW, AVATARH);
+		ctx.fillStyle = "pink";
+        ctx.fillRect(25, 570, AVATARW, AVATARH);
+        sampleP = ctx.getImageData(25, 570, AVATARW, AVATARH);
+		ctx.fillStyle = "orange";
+        ctx.fillRect(25, 570, AVATARW, AVATARH);
+        sampleO = ctx.getImageData(25, 570, AVATARW, AVATARH);
+		ctx.fillStyle = "green";
+        ctx.fillRect(25, 570, AVATARW, AVATARH);
+        sampleG = ctx.getImageData(25, 570, AVATARW, AVATARH);			
 		
         /*
         window.addEventListener("keydown", function(e) {
@@ -213,7 +233,8 @@ function readInput(instance) {
 		instance.loadedShot.x += 50;
     }
     if (keyCode == 38) {
-	shootProjectile();
+		//shootProjectile(instance);
+		shotFlag = 1;
     }
     if (keyCode == 40) {
 	swapShot(instance);
@@ -222,8 +243,8 @@ function readInput(instance) {
 
 }
 
-function shootProjectile() {
-			        
+function shootProjectile(instance) {
+				        
 }
 
 function swapShot(instance) {
@@ -313,12 +334,18 @@ function component(width, height, color, x, y, p) {
 
 function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, rows) {
     if (p.isP1) p.clear();
-	else p.clearAva();
+	else {
+		p.clearAva();
+		p.loadedShot.update();
+	}
     myAvatar.update();
     leftBound.update();
     rightBound.update();
     floorBound.update();
 	p.blank.update();
+	if (shotFlag == 1 && p.isP1) {
+		p.loadedShot.y -= 3;
+	}	
 	p.loadedShot.update();
 	/*
 	for (var i = 0; i < 11; i++) {
@@ -372,7 +399,7 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
     }
     */
     var j = p1.myAvatar.x;
-
+	
     Framework.sendData({
 	"type":"palamedes",
 	"row1":row1,
@@ -391,7 +418,8 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
 }
 
 function recieveData(data) {
-    if(data.type == "palamedes") {
+
+	if(data.type == "palamedes") {
         drawRow(data.row1, 0, p2);
         drawRow(data.row2, 50, p2);
         drawRow(data.row3, 100, p2);
@@ -403,8 +431,8 @@ function recieveData(data) {
         drawRow(data.row9, 400, p2);
         drawRow(data.row10, 450, p2);
         drawRow(data.row11, 500, p2);
-	//console.log(data.ap);
-	p2.myAvatar.x = data.ap;
+		//console.log(data.ap);
+		p2.myAvatar.x = data.ap;
     }
 }
 
@@ -431,7 +459,7 @@ function rows(p, queue) {
     //myAvatar.newPos();
     //myAvatar.update();
     count += 1;
-    if (count == 50) {
+    if (count == 500) {
         insertRow(queue);
 		//checkMatch(p);
         count = 0; 
@@ -506,7 +534,7 @@ function insertRow(queue) {
 function drawRow(row, y, p) {
 
     var x = 25;
-    ctx = p.context;
+    var ctx = p.context;
     for (var i = 0; i < ROWLENGTH; i++) {
         if (row[i] != 0) {
         if (row[i] == 1) {
@@ -576,4 +604,5 @@ function drawRow(row, y, p) {
 
 
 function endGame() {
+
 }
