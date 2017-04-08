@@ -119,11 +119,12 @@ Game.prototype._setClientGameOver = function() {
 		myRating = this.player2_rating;
 	}
 
+	var game_id = Framework.getGameId();
 	var self = this;
 	$.ajax({
 		type: "POST",
 		url: "/updateScore",
-		data: {"id": id_token,"result":result, "myRating":myRating, "theirRating":theirRating},
+		data: {"id": id_token,"result":result, "myRating":myRating, "theirRating":theirRating, "gameId": game_id},
 		success: function(data) {
 			if (Framework.getPeerId() == self.player1) {
 				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.myRatingGain);
@@ -169,6 +170,7 @@ Game.prototype.rematch = function() {
 function throwError(func, msg) {
 	throw new Error(func + " " + msg);
 }
+
 
 return Game;
 

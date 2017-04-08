@@ -159,6 +159,11 @@ Framework.getRating = function(peerId) {
 	return peer.getRating(peerId);
 }
 
+Framework.getGameId = function() {
+	var temp = window.location.href.split("/");
+    return temp[temp.length - 1];
+}
+
 // Call function with null rating and it will hide the current rating
 Framework.toggleRatingDisplay = function(rating) {
 	if (rating == null) {
@@ -298,6 +303,7 @@ function initializeButtons() {
 function loadGameInfo() {
 	var gameCount = 0;
 	var rating;
+	var gameId = Framework.getGameId();
 	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
     $.when( $.getJSON("/project/game-config.json", function(json) {        
         		json.games.forEach(function(val) {
@@ -308,7 +314,7 @@ function loadGameInfo() {
 			$.ajax({
 				type: "POST",
 				url: "/getRating",
-				data: {"id": id_token},
+				data: {"id": id_token, "gameId": gameId},
 				success: function(data) {
 					Framework.toggleRatingDisplay(data.rating);
             		console.log("Your Rating is " + data.rating);

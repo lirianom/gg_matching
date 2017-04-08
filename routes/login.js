@@ -1,16 +1,17 @@
-function getQuery(gameResult, r) {
-	var query;
+function getResult(gameResult) {
+	var selector;
 	if (gameResult == 1) {
-        query = {"win": r.row("win").add(1)};
+        selector = "win";
     }
     else if (gameResult == 0) {
-        query = {"loss": r.row("loss").add(1)};
+        selector = "loss";
     }
-    else
-        query = {"tie": r.row("tie").add(1)};
-	
-	return query;
+    else {
+        selector = "tie";
+    }
+	return selector;	
 }
+
 
 function invertGameResult(gameResult) {
 	var invert_gameResult;
@@ -23,6 +24,73 @@ function invertGameResult(gameResult) {
     else
         invert_gameResult = .5;
 	return invert_gameResult;
+}
+
+function updateStats(confirmed_id, gameResult, gameId, connection, r, req, res) {
+	
+	query = "{\"" + gameId + "\":{\"win\":0,\"tie\":0,\"loss\":0,\"rating\":1000}}";	
+	query = JSON.parse(query);
+	r.table("users").get(confirmed_id).hasFields(gameId).run(connection,
+		function(err, cursor) {
+			if (err) throw err;
+			if (cursor == false) {
+				r.table("users").get(confirmed_id).update(query).run( connection,
+					function(err,cursor) {
+						if(err) throw err;
+						incrementWTLStats(confirmed_id, gameResult, gameId, connection, r, req, res);
+						updateRating(confirmed_id, gameResult, gameId, connection, r, req, res);
+					}
+				);
+			}
+			else {
+				incrementWTLStats(confirmed_id, gameResult, gameId, connection, r, req, res);
+				updateRating(confirmed_id, gameResult, gameId, connection, r, req, res);
+			}
+		}
+	);
+
+}
+
+function incrementWTLStats(confirmed_id, gameResult, gameId, connection, r, req, res) {
+	var selector = getResult(gameResult);
+	r.table('users').get(confirmed_id)(gameId)(selector).run(connection,
+		function(err, cursor) {
+			if (err) throw err;
+		
+			var query = "{\"" + gameId + "\":{\"" + selector + "\":" + parseInt(cursor + 1) + "}}";
+    		query = JSON.parse(query);
+
+			r.table('users').get(confirmed_id).update(query).run(connection,
+		
+        		function(err, cursor) {
+            		if (err) throw err;
+        		}
+    		);
+		}
+	);
+	
+
+}
+
+function updateRating(confirmed_id, gameResult, gameId, connection, r,req,res) {
+	var ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, gameResult);
+	var invert_gameResult = invertGameResult(gameResult);
+	r.table("users").get(confirmed_id)(gameId)("rating").run(connection,
+		function( err, cursor) {
+			if (err) throw err;
+			
+			var query = "{\"" + gameId + "\":{\"rating\":" + parseInt(cursor + ratingGain) + "}}";
+			query = JSON.parse(query);
+			r.table('users').get(confirmed_id).update(query).run(connection,
+    	    	function(err, cursor) {
+        	    	if (err) throw err;
+            		var theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, invert_gameResult);
+            		ratingResults = ({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain, "result" : gameResult});
+            		res.send(ratingResults);
+        		}
+    		);
+		}
+	);
 }
 
 function calculateRatingGain(myRating, opponentRating, myGameResult) {
@@ -45,24 +113,8 @@ function calculateAccountUpdates(confirmed_id, req, res, connection, r) {
 
 function calculateRating(confirmed_id, req, res, connection, r) {
 	var gameResult = parseFloat(req.body.result);
-	var invert_gameResult = invertGameResult(gameResult);
-	var query = getQuery(gameResult,r);
-	var ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, gameResult);
-	
-    r.table('users').get(confirmed_id).update(query).run(connection,
-    	function(err, cursor) {
-    		if (err) throw err;
-    	}
-    );
-
-    r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
-    	function(err, cursor) {
-    		if (err) throw err;
-           	var theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, invert_gameResult);
-			ratingResults = ({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain, "result" : gameResult});
-			res.send(ratingResults);
-       	}
-	);
+	var gameId = req.body.gameId;
+	updateStats(confirmed_id, gameResult, gameId, connection, r, req, res);	
 }
 
 module.exports = {
@@ -97,7 +149,6 @@ retryLogin: function(req,res,connection,r,limit) {
 login: function(req,res,connection,r, limit) {
 	confirmed_id = module.exports.checkAuth(req);
 	if (confirmed_id == null && limit < 10) {
-		console.log(limit);
 		limit = limit + 1;
 		module.exports.retryLogin(req,res,connection,r, limit);		
 	}
@@ -113,7 +164,7 @@ login: function(req,res,connection,r, limit) {
                	cursor.toArray(function(err, result) {
                    	if (err) throw err;
                    	if (result.length == 0) {
-						var userObj = {"id":confirmed_id, "win":0, "tie":0, "loss":0, "rating" : 1000}
+						var userObj = {"id":confirmed_id}
                        	r.table('users').insert([userObj]).run(connection, function(err, result) {
                            	if (err) throw err;
                            	console.log(JSON.stringify(result, null, 2));
@@ -161,9 +212,8 @@ retryGetRating: function(req,res,connection,r,limit) {
 
 getRating: function(req,res,connection,r, limit) {
 	var confirmed_id = module.exports.checkAuth(req);
-	
+	var gameId = req.body.gameId;	
 	if (confirmed_id == null && limit < 10) {
-        console.log(limit);
         limit = limit + 1;
         module.exports.retryGetRating(req,res,connection,r, limit);
     }
@@ -173,12 +223,22 @@ getRating: function(req,res,connection,r, limit) {
     }
 
 	if ( confirmed_id != null) {
-		r.table('users').get(confirmed_id).pluck("rating").run(connection,
-                function(err, cursor) {
-                    if (err) throw err;
-					res.send(cursor);
-                }
-    	);
+		r.table('users').get(confirmed_id).hasFields(gameId).run(connection,
+			function(err, cursor) {
+				if (err) throw err;
+				if (cursor == true) {
+					r.table('users').get(confirmed_id)(gameId)("rating").run(connection,
+                		function(err, cursor) {
+                    		if (err) throw err;
+							res.send({"rating":cursor});
+                		}
+    				);
+					
+				}
+				else res.send({"rating":1000});
+
+			}
+			);
 	}
 }
 

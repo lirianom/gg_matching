@@ -154,6 +154,9 @@ function myGameArea(ri, iq, r, temp)  {
             row10[i] = 0;
             row11[i] = 0;
         }
+		var ctx = this.context;
+		ctx.fillStyle = "brown"
+		
         /*
         window.addEventListener("keydown", function(e) {
             myGameArea.keys = (myGameArea.keys || []);
@@ -450,9 +453,7 @@ function checkMatch(p) {
 	//console.log(compareImages(shotData, checkData));
 	if(compareImages(shotData, checkData)) {
 		ctx.clearRect(p.loadedShot.x, p.loadedShot.y + 50, AVATARW, AVATARH);
-		clearInterval(p.interval);
-		ctx.fillStyle = "red";
-		ctx.fillRect(0,0,500,500);
+		
 	} 
 	
 }
