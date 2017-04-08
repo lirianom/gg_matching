@@ -39,6 +39,12 @@ shotLibrary[4] = "yellow";
 shotLibrary[5] = "brown";
 shotLibrary[6] = "grey";
 var shot = shotLibrary[0];
+var sampleBr;
+var sampleY;
+var sampleP;
+var sampleO;
+var sampleBl;
+var sampleG;
 
 //var rowWorker = new Worker('workRow.js');
 
@@ -337,6 +343,7 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
         myAvatar.update()
     }
     */
+	checkMatch(p);
     rows(p, queue);
     /*
     drawRow(row1, 0, p);
@@ -423,7 +430,7 @@ function rows(p, queue) {
     count += 1;
     if (count == 50) {
         insertRow(queue);
-		checkMatch(p);
+		//checkMatch(p);
         count = 0; 
     }
 
@@ -440,10 +447,12 @@ function checkMatch(p) {
 	var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
 	//console.log(shotData);
 	var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
-	console.log(compareImages(shotData, checkData));
+	//console.log(compareImages(shotData, checkData));
 	if(compareImages(shotData, checkData)) {
 		ctx.clearRect(p.loadedShot.x, p.loadedShot.y + 50, AVATARW, AVATARH);
 		clearInterval(p.interval);
+		ctx.fillStyle = "red";
+		ctx.fillRect(0,0,500,500);
 	} 
 	
 }

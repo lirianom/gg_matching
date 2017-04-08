@@ -2,7 +2,6 @@ https://www.airpair.com/javascript/posts/using-rethinkdb-with-expressjs
 https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas
 https://hacks.mozilla.org/2016/01/webgl-off-the-main-thread/
 
-show elo on screen
 keep going when tab not in focus
-implement ties
-negative ratings issue
+rating for specific games
+if someone closes page give them loss? and end game?

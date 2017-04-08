@@ -128,13 +128,16 @@ Game.prototype._setClientGameOver = function() {
 			if (Framework.getPeerId() == self.player1) {
 				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.myRatingGain);
 				self.player2_rating =  parseInt(self.player2_rating) +  parseInt(data.theirRatingGain);
+				Framework.updateRatingDisplay(self.player1_rating);
 			}
 			else {
 				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.theirRatingGain);
                 self.player2_rating =  parseInt(self.player2_rating) + parseInt(data.myRatingGain);
+				Framework.updateRatingDisplay(self.player2_rating);
 			}
 		}
 	});
+	
 }
 
 Game.prototype.setWinner = function(id) {

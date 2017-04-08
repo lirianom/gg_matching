@@ -1,9 +1,42 @@
+function getQuery(gameResult, r) {
+	var query;
+	if (gameResult == 1) {
+        query = {"win": r.row("win").add(1)};
+    }
+    else if (gameResult == 0) {
+        query = {"loss": r.row("loss").add(1)};
+    }
+    else
+        query = {"tie": r.row("tie").add(1)};
+	
+	return query;
+}
+
+function invertGameResult(gameResult) {
+	var invert_gameResult;
+	if (gameResult == 1) {
+        invert_gameResult = 0;
+    }
+    else if (gameResult == 0) {
+        invert_gameResult = 1;
+    }
+    else
+        invert_gameResult = .5;
+	return invert_gameResult;
+}
+
 function calculateRatingGain(myRating, opponentRating, myGameResult) {
     if ([0, 0.5, 1].indexOf(myGameResult) === -1) {
       	return null;
     }
    	var myChanceToWin = 1 / ( 1 + Math.pow(10, (opponentRating - myRating) / 400));
-  	return Math.round(32 * (myGameResult - myChanceToWin));
+  	var result = Math.round(32 * (myGameResult - myChanceToWin));
+	if (parseInt(myRating) + result < 1) {
+		return 0;
+	}
+	else {
+		return result;
+	}
 }
 
 function calculateAccountUpdates(confirmed_id, req, res, connection, r) {
@@ -12,40 +45,24 @@ function calculateAccountUpdates(confirmed_id, req, res, connection, r) {
 
 function calculateRating(confirmed_id, req, res, connection, r) {
 	var gameResult = parseFloat(req.body.result);
-	var query;
-	if (gameResult == 1) {
-		query = {"win": r.row("win").add(1)};
-	}
-	else if (gameResult == 0) {
-		query = {"loss": r.row("loss").add(1)};
-	}
-	else 
-		query = {"tie": r.row("tie").add(1)};
-
+	var invert_gameResult = invertGameResult(gameResult);
+	var query = getQuery(gameResult,r);
 	var ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, gameResult);
+	
     r.table('users').get(confirmed_id).update(query).run(connection,
     	function(err, cursor) {
     		if (err) throw err;
     	}
     );
 
-	if (gameResult == 1) {
-		var invert_gameResult = 0;
-	}	
-	else if (gameResult == 0) {
-		var invert_gameResult = 1;
-	}
-	else 
-		var invert_gameResult = .5;
-
     r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
     	function(err, cursor) {
     		if (err) throw err;
-            var theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, invert_gameResult);
+           	var theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, invert_gameResult);
 			ratingResults = ({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain, "result" : gameResult});
 			res.send(ratingResults);
-        }
-    );
+       	}
+	);
 }
 
 module.exports = {
@@ -54,7 +71,6 @@ checkAuth: function(req) {
     var token = req.body.id;
     // http://stackoverflow.com/questions/34833820/do-we-need-to-hide-the-google-oauth-client-id
 	// https://developers.google.com/identity/protocols/OAuth2UserAgent
-
 	//https://developers.google.com/identity/protocols/OAuth2
     var CLIENT_ID = "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com";
     var GoogleAuth = require('google-auth-library');
@@ -65,7 +81,6 @@ checkAuth: function(req) {
         token,
         CLIENT_ID,
         function(e, login) {
-
             var payload = login.getPayload();
             userid = payload['sub'];
             //https://developers.google.com/identity/sign-in/web/backend-auth
@@ -73,11 +88,9 @@ checkAuth: function(req) {
     );
     console.log("Verify: " + userid);
     return userid;
-
 },
 
 retryLogin: function(req,res,connection,r,limit) {
-		
 	setTimeout(function() {module.exports.login(req,res,connection,r, limit); }, 100);
 },
 
@@ -99,13 +112,11 @@ login: function(req,res,connection,r, limit) {
                	if (err) throw err;
                	cursor.toArray(function(err, result) {
                    	if (err) throw err;
-                   	//console.log(JSON.stringify(result, null, 2));
                    	if (result.length == 0) {
 						var userObj = {"id":confirmed_id, "win":0, "tie":0, "loss":0, "rating" : 1000}
                        	r.table('users').insert([userObj]).run(connection, function(err, result) {
                            	if (err) throw err;
                            	console.log(JSON.stringify(result, null, 2));
-                           	// could queyr for it again
                            	res.send( userObj );
                        	})
                    	}
@@ -140,10 +151,7 @@ updateScore: function(req,res,connection,r) {
 	if ( confirmed_id != null) {
 		calculateAccountUpdates(confirmed_id, req, res,connection, r);
 	}
-
     console.log("Updated Score for: " + confirmed_id);
-
-
 },
 
 retryGetRating: function(req,res,connection,r,limit) {
@@ -168,7 +176,6 @@ getRating: function(req,res,connection,r, limit) {
 		r.table('users').get(confirmed_id).pluck("rating").run(connection,
                 function(err, cursor) {
                     if (err) throw err;
-			//		console.log(cursor)	
 					res.send(cursor);
                 }
     	);

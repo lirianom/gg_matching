@@ -159,6 +159,21 @@ Framework.getRating = function(peerId) {
 	return peer.getRating(peerId);
 }
 
+// Call function with null rating and it will hide the current rating
+Framework.toggleRatingDisplay = function(rating) {
+	if (rating == null) {
+		$("#rating").remove();
+	}
+	else if ($("#rating").length != 1) {
+            $("#nav").prepend("<li id='rating' class='color_orange'>" + rating + "</li>");
+    }
+	
+}
+
+Framework.updateRatingDisplay = function(rating) {
+	$("#rating").html(rating);
+}
+
 // Return the PeerId even if they are disconnected
 Framework.getPeerId = function() {
 	return peer.getPeerId();
@@ -295,6 +310,7 @@ function loadGameInfo() {
 				url: "/getRating",
 				data: {"id": id_token},
 				success: function(data) {
+					Framework.toggleRatingDisplay(data.rating);
             		console.log("Your Rating is " + data.rating);
 					rating = data.rating;
         		}
@@ -303,6 +319,7 @@ function loadGameInfo() {
 		.done(function() {
 				
 			peer = PeerInstance(gameList, rating);
+			
 			peer.defineHandleData(tempHandleData);
 			peer.defineHandleFrameworkInfo(handleFrameworkInfo);
 			peer.defineHandleGameInfo(handleGameInfo);
