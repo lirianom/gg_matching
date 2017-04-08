@@ -60,8 +60,9 @@ function determineVictory() {
    	else if (myMove == "Scissors" && oppChoice == "Rock") $("#result").html("L");
 	else if (myMove == "Scissors" && oppChoice == "Paper") $("#result").html("W");
 	// Modify so not reading from HTML
-	if ($("#result").html() == "W") return true;
-	else return false;
+	if ($("#result").html() == "W") return 1;
+	else if ($("#result").html() == "T") return .5;
+	else return 0;
 }
 
 function moves() {	
@@ -93,13 +94,21 @@ function moves() {
 
 
 function gameComplete() {
-    if (determineVictory()) {
-		console.log("I Won");
+    var result = determineVictory() 
+	if ( result == 1) {
+		console.log("Win");
 		Framework.getGame().setWinner(Framework.getPeerId());
 	}
+	else if ( result == .5) {
+		console.log("Tie");
+		Framework.getGame().setWinner(0);
+	}
+	else {
+		console.log("Loss");
+	}
+	
 	$("#rock").off();
 	$("#paper").off();
 	$("#scissors").off();
-	console.log(determineVictory());
 }
 

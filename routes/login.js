@@ -2,14 +2,51 @@ function calculateRatingGain(myRating, opponentRating, myGameResult) {
     if ([0, 0.5, 1].indexOf(myGameResult) === -1) {
       	return null;
     }
-    
    	var myChanceToWin = 1 / ( 1 + Math.pow(10, (opponentRating - myRating) / 400));
-	console.log( Math.round(32 * (myGameResult - myChanceToWin)) );
   	return Math.round(32 * (myGameResult - myChanceToWin));
 }
 
+function calculateAccountUpdates(confirmed_id, req, res, connection, r) {
+	calculateRating(confirmed_id, req, res, connection, r);
+}
 
+function calculateRating(confirmed_id, req, res, connection, r) {
+	var gameResult = parseFloat(req.body.result);
+	var query;
+	if (gameResult == 1) {
+		query = {"win": r.row("win").add(1)};
+	}
+	else if (gameResult == 0) {
+		query = {"loss": r.row("loss").add(1)};
+	}
+	else 
+		query = {"tie": r.row("tie").add(1)};
 
+	var ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, gameResult);
+    r.table('users').get(confirmed_id).update(query).run(connection,
+    	function(err, cursor) {
+    		if (err) throw err;
+    	}
+    );
+
+	if (gameResult == 1) {
+		var invert_gameResult = 0;
+	}	
+	else if (gameResult == 0) {
+		var invert_gameResult = 1;
+	}
+	else 
+		var invert_gameResult = .5;
+
+    r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
+    	function(err, cursor) {
+    		if (err) throw err;
+            var theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, invert_gameResult);
+			ratingResults = ({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain, "result" : gameResult});
+			res.send(ratingResults);
+        }
+    );
+}
 
 module.exports = {
 
@@ -64,7 +101,7 @@ login: function(req,res,connection,r, limit) {
                    	if (err) throw err;
                    	//console.log(JSON.stringify(result, null, 2));
                    	if (result.length == 0) {
-						var userObj = {"id":confirmed_id, "win":0,"loss":0, "rating" : 1000}
+						var userObj = {"id":confirmed_id, "win":0, "tie":0, "loss":0, "rating" : 1000}
                        	r.table('users').insert([userObj]).run(connection, function(err, result) {
                            	if (err) throw err;
                            	console.log(JSON.stringify(result, null, 2));
@@ -98,47 +135,11 @@ setupUser: function(req,res,connection,r) {
 },
 
 updateScore: function(req,res,connection,r) {
-	var isWinner = req.body.isWinner;
 	var confirmed_id = module.exports.checkAuth(req);
-	
-	var ratingGain;
-
+		
 	if ( confirmed_id != null) {
-		console.log(typeof(isWinner) + isWinner);
-		// For ties might want to not increment wins or loss ? or maybe add tie field
-		if (isWinner == "true") {
-			ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, 1);
-        	r.table('users').get(confirmed_id).update({"win": r.row("win").add(1)}).run(connection,
-            	function(err, cursor) {
-            	    if (err) throw err;
-            	}
-        	);
-			r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
-                function(err, cursor) {
-                    if (err) throw err;
-					theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, 0);
-					res.send({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain});
-                }
-            );	
-		}
-		else {
-			ratingGain = calculateRatingGain(req.body.myRating, req.body.theirRating, 0);
-			r.table('users').get(confirmed_id).update({"loss": r.row("loss").add(1)}).run(connection,
-                function(err, cursor) {
-                    if (err) throw err;
-					theirRatingGain = calculateRatingGain(req.body.theirRating, req.body.myRating, 1);
-                    res.send({"myRatingGain":ratingGain,"theirRatingGain":theirRatingGain});
-                }
-            );	
-			r.table('users').get(confirmed_id).update({"rating": r.row("rating").add(ratingGain)}).run(connection,
-				function(err, cursor) {
-					if (err) throw err;
-					// send elo?
-				}
-			);
-
-		}
-    };
+		calculateAccountUpdates(confirmed_id, req, res,connection, r);
+	}
 
     console.log("Updated Score for: " + confirmed_id);
 

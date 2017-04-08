@@ -430,11 +430,32 @@ function rows(p, queue) {
 }
 
 function checkMatch(p) {
+	//var ctx = p.canvas.getContext("2d");
+	//var matcher = ctx.rect(p.loadedShot.x, p.loadedShot.y + 50, 50, 50);
+	//if (matcher.getContext()) {
+	//	console.log("yeh");
+	//}
+    	
 	var ctx = p.canvas.getContext("2d");
-	var matcher = ctx.rect(p.loadedShot.x, p.loadedShot.y + 50, 50, 50);
-	if (matcher.getContext()) {
-		console.log("yeh");
+	var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
+	//console.log(shotData);
+	var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
+	console.log(compareImages(shotData, checkData));
+	if(compareImages(shotData, checkData)) {
+		ctx.clearRect(p.loadedShot.x, p.loadedShot.y + 50, AVATARW, AVATARH);
+		clearInterval(p.interval);
 	} 
+	
+}
+
+function compareImages(img1, img2) {
+	if(img1.data.length != img2.data.length)
+		return false;
+	for(var i = 0; i < img1.data.length; ++i){
+		if(img1.data[i] != img2.data[i])
+			return false;
+	}
+    return true;	
 }
 
 function makeRow(min, max) {

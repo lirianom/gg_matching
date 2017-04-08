@@ -95,14 +95,16 @@ Game.prototype.setAllowMoves = function(val) {
 
 // make private
 Game.prototype._setClientGameOver = function() {
-	var isWinner = false;
+	var result = 0;
 	this.gameOver = true;
 	
 	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
 	Framework.endGameCleanUp();
-	if (this.winner == Framework.getPeerId())
-	{
-		isWinner = true;	
+	if (this.winner == Framework.getPeerId()) {
+		result = 1;	
+	}
+	else if (this.winner == 0) {
+		result = .5
 	}
 
 	var myRating;
@@ -116,15 +118,13 @@ Game.prototype._setClientGameOver = function() {
 		theirRating = this.player1_rating;
 		myRating = this.player2_rating;
 	}
-	console.log(this.player2_rating);
 
 	var self = this;
 	$.ajax({
 		type: "POST",
 		url: "/updateScore",
-		data: {"id": id_token,"isWinner":isWinner, "myRating":myRating, "theirRating":theirRating},
+		data: {"id": id_token,"result":result, "myRating":myRating, "theirRating":theirRating},
 		success: function(data) {
-			console.log("Updated Stats");
 			if (Framework.getPeerId() == self.player1) {
 				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.myRatingGain);
 				self.player2_rating =  parseInt(self.player2_rating) +  parseInt(data.theirRatingGain);
@@ -133,31 +133,8 @@ Game.prototype._setClientGameOver = function() {
 				self.player1_rating = parseInt(self.player1_rating) + parseInt(data.theirRatingGain);
                 self.player2_rating =  parseInt(self.player2_rating) + parseInt(data.myRatingGain);
 			}
-			console.log(self.player1_rating);
-			console.log(self.player2_rating);
 		}
 	});
-}
-
-function handleUpdateScoreResults(data) {
-	console.log("Updated Stats");
-	console.log(Game);
-	Game.adjustRating(data);
-}
-
-Game.prototype.adjustRating = function(data) {
-
-    if (Framework.getPeerId() == this.player1) {
-        this.player1_rating += parseInt(data.myRatingGain);
-        this.player2_rating += parseInt(data.theirRatingGain);
-    }
-    else {
-        this.player1_rating += parseInt(data.theirRatingGain);
-     	this.player2_rating += parseInt(data.myRatingGain);
-  	}
-    console.log(this.player1_rating);
-    console.log(this.player2_rating);
-
 }
 
 Game.prototype.setWinner = function(id) {
