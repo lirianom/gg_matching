@@ -59,7 +59,6 @@ function setUsername(id_token, profile) {
 	var username = prompt("Please select a username",
             profile.getName());
 	$.ajax({
-
 		type: "POST",
 		url: "/setupUser",
 		data: { "id": id_token, "gu" : "verify", "username" : username},

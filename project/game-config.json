@@ -6,6 +6,7 @@
 	{"name":"palamedes","file":"palamedes.html","path":"project/games/palamedes"},
 	{"name":"rps","file":"rps.html","path":"project/games/rps/"},
 	{"name":"ttt","file":"ttt.html","path":"project/games/ttt/"},
-	{"name":"oldttt","file":"oldttt.html","path":"project/games/oldttt/"}
+	{"name":"oldttt","file":"oldttt.html","path":"project/games/oldttt/"},
+	{"name":"banana","file":"banana.html","path":"project/games/banana/"}
 	]
 }

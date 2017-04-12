@@ -6,7 +6,7 @@ function Game(readyList) { // Constructor
 	instance = this;
 
 	var player1;
-    var player2;
+ 	var player2;
     var player1_rating;
 	var player2_rating;
 
