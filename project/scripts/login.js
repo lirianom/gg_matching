@@ -32,8 +32,10 @@ function onSignIn(googleUser) {
 		url: "/login",
 		data: {"id" : id_token},
 		success: function(data) {
+			
 			if (data[0] != undefined) { 
 				displayUsername(data[0].username);
+				displayFriends(data[0].friends);
 			}
 			else { 
 				setUsername(id_token, profile);
@@ -66,6 +68,11 @@ function setUsername(id_token, profile) {
 			displayUsername(data);
 		}
 	});
+
+}
+
+function displayFriends(friends) {
+	console.log(friends);
 
 }
 

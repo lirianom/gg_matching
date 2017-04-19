@@ -3,10 +3,17 @@
  */
 
 // New Peer Object
-function PeerInstance(configs, rating) {
+function PeerInstance(configs, rating, isChat) {
 "use strict";
 var instance = {};
 var connectedPeers = {};
+
+function getGameId(gameList) {
+	if (isChat) {
+		return "C";
+	}
+	return gameList[window.location.href];
+}
 
 // Generates a 14 hex digits followed by a -# of the unique game id and -# for the peer's rating
 instance.createPeerId = function(gameList,rating) {
@@ -16,7 +23,7 @@ instance.createPeerId = function(gameList,rating) {
         s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
     }
 	
-    s[15] = "-" + gameList[window.location.href];
+    s[15] = "-" + getGameId(gameList);
 	s[16] = "-" + rating; 
     var peerId = s.join("");
     return peerId;
@@ -44,13 +51,15 @@ instance.createPeer = function(configs, rating) {
 
     // Show peer id on webpage
     peer.on('open', function(id){
-        $('#pid').val(id);
-        $('#pid').text(id);
+		if (!isChat) {
+        	$('#pid').val(id);
+        	$('#pid').text(id);
+		}
     });
 
     // Await connections from others
     peer.on('connection', function(c) {
-        instance.connect(c);
+        instance.connect(c, configs);
     });
 
     // Log Errors
@@ -134,9 +143,11 @@ instance.tryRandomConnection = function(listOfUsers) {
 
 // Displays the peer that you connect to, add them to the connectedPeers list and disconnect from the PeerJS server
 instance.setupConnection = function(c) {
-	$('#rid').val(c.peer);
+	if (!isChat) { 
+		$('#rid').val(c.peer);
+	}
 	connectedPeers[c.peer] = 1;
-    setTimeout(function() { instance.peer.disconnect(); }, 100);
+    //setTimeout(function() { instance.peer.disconnect(); }, 100);
 }
 
 // Connects to the specified peer and then disconnects from PeerJS server
@@ -145,7 +156,7 @@ instance.createConnection = function(labelVal, requestedPeer) {
 		var conn = instance.peer.connect(requestedPeer, {label: labelVal});
 		conn.on('open', function() {
 			instance.connect(conn);
-			instance.peer.disconnect(); // Still connected to its peer just cant accept any other requests
+			//instance.peer.disconnect(); // Still connected to its peer just cant accept any other requests
 		});
 		conn.on('error', function(err) { alert(err); });
 	}
@@ -187,6 +198,12 @@ instance.getPeerId = function() {
 // When connecting setupConnection and set the on data function
 instance.connect = function(c) {
 	instance.setupConnection(c);
+	if (isChat) { 
+		Framework.displayChat(); 
+	}
+	else { // Might want option for chat users to disconnect themselves from chat
+		setTimeout(function() { instance.peer.disconnect(); }, 100);
+	}
     c.on('data', function(data) {
 		instance.onData(c,data);
    	});

@@ -135,7 +135,6 @@ Game.prototype._setClientGameOver = function() {
 }
 
 Game.prototype.setWinner = function(id) {
-	console.log("set winner");
 	this.winner = id;
 }
 

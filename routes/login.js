@@ -180,11 +180,142 @@ login: function(req,res,connection,r, limit) {
 	}
 },
 
+retryAddFriend: function(req,res,connection,r,limit) {
+    // Can improve this similar to enterRankedConnectionQueue
+    setTimeout(function() {module.exports.addFriend(req,res,connection,r, limit); }, 100);
+},
+
+
+addFriend: function(req,res,connection,r,limit) {
+	var confirmed_id = module.exports.checkAuth(req);
+	
+	if (confirmed_id == null && limit < 10) {
+        limit = limit + 1;
+	    module.exports.retryAddFriend(req,res,connection,r, limit);
+	}
+	if (!(limit < 10)) {
+        console.log("Failed to add friend on server within 10 tries.");
+    }
+
+	if ( confirmed_id != null) {
+        r.table('users').get(confirmed_id).update({"friends":r.row("friends").append({"username":req.body.newFriend,"chatId":"0"})}).run(connection,
+            function(err, cursor) {
+                if (err) throw err;
+				console.log(cursor);
+                res.send({"addFriend":true});
+            }
+         );
+    }
+
+},
+
+retryGetFriends: function(req,res,connection,r,limit) {
+    // Can improve this similar to enterRankedConnectionQueue
+    setTimeout(function() {module.exports.getFriends(req,res,connection,r, limit); }, 100);
+},
+
+
+getFriends: function(req,res,connection,r,limit) {
+    var confirmed_id = module.exports.checkAuth(req);
+
+    if (confirmed_id == null && limit < 10) {
+        limit = limit + 1;
+        module.exports.retryGetFriends(req,res,connection,r, limit);
+    }
+    if (!(limit < 10)) {
+        console.log("Failed to get friends on server within 10 tries.");
+    }
+
+    if ( confirmed_id != null) {
+        r.table('users').get(confirmed_id)('friends').run(connection,
+            function(err, cursor) {
+                if (err) throw err;
+                res.send(cursor);
+            }
+         );
+    }
+
+},
+
+retrySetChatId: function(req,res,connection,r,limit) {
+    // Can improve this similar to enterRankedConnectionQueue
+    setTimeout(function() {module.exports.setChatId(req,res,connection,r, limit); }, 100);
+},
+
+
+setChatId: function(req,res,connection,r,limit) {
+    var confirmed_id = module.exports.checkAuth(req);
+    //console.log(req.body.username);
+    if (confirmed_id == null && limit < 10) {
+        limit = limit + 1;
+        module.exports.retrySetChatId(req,res,connection,r, limit);
+    }
+    if (!(limit < 10)) {
+        console.log("Failed to get friends on server within 10 tries.");
+    }
+
+    if ( confirmed_id != null) {
+        r.table('users').get(confirmed_id).update({"chatId":req.body.chatId}).run(connection,
+            function(err, cursor) {
+                if (err) throw err;
+                //console.log(cursor);
+                res.send({"chatId":req.body.chatId});
+            }
+         );
+    }
+
+},
+
+retryGetChatId: function(req,res,connection,r,limit) {
+    // Can improve this similar to enterRankedConnectionQueue
+    setTimeout(function() {module.exports.getChatId(req,res,connection,r, limit); }, 100);
+},
+
+
+getChatId: function(req,res,connection,r,limit) {
+    var confirmed_id = module.exports.checkAuth(req);
+	console.log(req.body.username);
+    if (confirmed_id == null && limit < 10) {
+        limit = limit + 1;
+        module.exports.retryGetChatId(req,res,connection,r, limit);
+    }
+    if (!(limit < 10)) {
+        console.log("Failed to get friends on server within 10 tries.");
+    }
+
+    if ( confirmed_id != null) {
+        r.table('users').filter({"username":req.body.username}).pluck('chatId').run(connection,
+            function(err, cursor) {
+                if (err) throw err;
+                //console.log(cursor);
+                cursor.toArray(function(err, result) {
+                    if (err) throw err;
+                    /*if (result.length == 0) {
+                        var userObj = {"id":confirmed_id}
+                        r.table('users').insert([userObj]).run(connection, function(err, result) {
+                            if (err) throw err;
+                            console.log(JSON.stringify(result, null, 2));
+                            res.send( userObj );
+                        })
+                    }
+                    else {
+                        res.send(result);
+                    }*/
+					console.log(result[0]);
+					res.send(result[0]);
+                });
+            }
+         );
+    }
+
+},
+
+
 
 setupUser: function(req,res,connection,r) {
 	var confirmed_id = module.exports.checkAuth(req);
 	if ( confirmed_id != null) {
-    	r.table('users').get(confirmed_id).update({"username":req.body.username}).run(connection,
+    	r.table('users').get(confirmed_id).update({"username":req.body.username,"friends":[]}).run(connection,
             function(err, cursor) {
                 if (err) throw err;
                 console.log(req.body.username);
@@ -241,6 +372,8 @@ getRating: function(req,res,connection,r, limit) {
 			);
 	}
 },
+
+
 
 retryForfiet: function(req,res,connection,r,limit) {
 	setTimeout(function() {module.exports.forfiet(req,res,connection,r,limit);},100);

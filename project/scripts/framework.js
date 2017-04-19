@@ -43,6 +43,7 @@ $(document).keypress(function ( e) {
 });
 
 var peer;
+var chatPeer;
 var readyList = [];
 var globalGame; 
 var gameList = {};
@@ -120,6 +121,7 @@ Framework.readyUp = function() {
 			peer.askForPeersToAgree("readyUp");
 			startGame(readyList);	
 		
+			shareUser();
 			$("#readyUp").off();
 			$("#readyUp").remove();
 		}
@@ -178,6 +180,14 @@ Framework.getPeerId = function() {
 // Sends passed data to every connected peer
 Framework.sendData = function(data) {
     peer.eachActiveConnection(function(c,$c) {
+        c.send(data);
+    });
+}
+
+Framework.sendChatData = function(data) {
+	// Can check here for specific person to send data to
+	console.log(data);
+	chatPeer.eachActiveConnection(function(c,$c) {
         c.send(data);
     });
 }
@@ -258,6 +268,16 @@ function startRematch() {
 	}
 }
 
+function shareUser() {
+	var username = $("#display_name").text();
+	Framework.sendData({"type":"FrameworkInfo","callFunction":"shareUser","username":username});
+	
+}
+
+function _shareUser(data) {
+	
+	$(".connection_bar").append("Opponent Username: " + data.username);
+}
 
 // Adds the html for logging at the bottom of the webpage
 function initializeLogging() {
@@ -269,16 +289,73 @@ function initializeLogging() {
 function initializeButtons() {
 	$(".connection_bar").prepend('<p>Your ID is <span id="pid"></span> <button id="copyId">Copy</button> <button id="autoConnect">Auto Connect</button></p>');
 	$(".connection_bar").prepend('<p>Connect to a peer:<input type="text" id="rid" placeholder="Someone else\'s id"><input class="button" type="button" value="Connect" id="connect"></p>');
-		
+	$(".chat_bar").append('<p>Chat with Peer <input type="text" id="chat_username" placeholder="Someone else\'s chat id"> <button id="chatConnect">Chat Connect</button></p>');		
 	$('#connect').click(function() {
     	peer.createConnection("manualConnection",$("#rid").val());
     });
+	$("#chatConnect").click(function() {
+		console.log(chatPeer.getPeerId());
+		connectChatWithUsername($("#chat_username").val());
+	});
     $('#autoConnect').click(function() {
     	peer.enterRankedConnectionQueue();
     });
 
 }
 
+function connectChatWithUsername(username) {
+	var id_token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+	// Can maybe by pass this if i store getFriends on loading
+	$.ajax({
+		type:"POST",
+		url: "/getChatId",
+		data: {"id":id_token,"username": username},
+		success: function(data) {
+			console.log(data);
+			var usersId = data.chatId;
+			if (usersId != undefined) {
+				chatPeer.createConnection("chatConnection",  usersId);
+			}
+			
+
+		}
+	});
+
+}
+
+Framework.displayChat = function() {
+	var chatbox = $('<div></div>').addClass('connection').addClass('active');
+    //var header = $('<h1></h1>').html('Chat with <strong>' + chatPeer.getPeerId() + '</strong>');
+    var messages = $('<div><em>Peer connected.</em></div>').addClass('messages');
+	var textbox = $('<div><input type="text" id="chattextbox" placeholder="Enter Message"></div>');	
+	$(textbox).keypress(handleChatData);
+	//$(chatbox).append(header);
+	$(chatbox).append(messages);
+	$(chatbox).append(textbox);
+	$(chatbox).append($("<hr>"));
+	$(".chat_bar").append(chatbox);
+	$(".log").hide();
+
+}
+
+function handleChatData(data) {
+	if (data.type != "chat") {
+		if (data.keyCode == 13) {
+			$(".messages").append("<br>");
+			$(".messages").append($("#display_name").text() + ": "); 
+			$(".messages").append( $("#chattextbox").val());
+			Framework.sendChatData({"type":"chat","messageFrom": $("#display_name").text(), "message":$("#chattextbox").val()});
+		    $("#chattextbox").val("");
+
+		}
+	}
+	else {
+		console.log(data.message);
+		$(".messages").append("<br>");
+		$(".messages").append( data.messageFrom + ": " + data.message);
+	}
+
+}
 
 /**
  *  Functions to generate Unique PeerId 
@@ -310,11 +387,21 @@ function loadGameInfo() {
 	)	
 		.done(function() {
 				
-			peer = PeerInstance(gameList, rating);
-			
+			peer = PeerInstance(gameList, rating, false);
+			chatPeer = PeerInstance(null, rating, true);	
 			peer.defineHandleData(tempHandleData);
 			peer.defineHandleFrameworkInfo(handleFrameworkInfo);
 			peer.defineHandleGameInfo(handleGameInfo);
+			chatPeer.defineHandleData(handleChatData);
+			setTimeout(function() { 
+				var chatId = chatPeer.getPeerId();
+				$.ajax({
+					type:"POST",
+					url:"/setChatId",
+					data: {"id": id_token, "chatId": chatId}
+				});
+
+			}, 100);
 			//console.log(peer);
 		})
 		.fail(function() {
@@ -324,18 +411,24 @@ function loadGameInfo() {
 
 // Handles communication for the framework between clients
 function handleFrameworkInfo(data) {
+	console.log(data);
     if (data.callFunction == "forceEndCountdown") {
         _forceEndCountdown();
     }
     if (data.callFunction == "initializeRematch") {
         _initializeRematch();
     }
+	if (data.callFunction == "shareUser") {
+		console.log("call _sh");
+		_shareUser(data);
+	}
     // Could be issues with this being run before readyList cleared in other client
     if (data.agreeTo == "rematch") {
         addToReadyList($("#rid").val());
         startRematch();
     }
     if (data.agreeTo == "readyUp") {
+		
         addToReadyList($("#rid").val()); // Need to add a function to get peer that is connected
         startGame(readyList); // Dont need to pass readyList
     }

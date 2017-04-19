@@ -7,6 +7,7 @@
 	{"name":"rps","file":"rps.html","path":"project/games/rps/"},
 	{"name":"ttt","file":"ttt.html","path":"project/games/ttt/"},
 	{"name":"oldttt","file":"oldttt.html","path":"project/games/oldttt/"},
-	{"name":"banana","file":"banana.html","path":"project/games/banana/"}
+	{"name":"banana","file":"banana.html","path":"project/games/banana/"},
+	{"name":"test","file":"test.html","path":"project/games/test/"}
 	]
 }

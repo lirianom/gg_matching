@@ -2,8 +2,8 @@ const BLOCKSPEED = 10;
 const MOVESPEED = 50;
 const AREAW = 500;
 const AREAH = 700;
-const AVATARW = 40;
-const AVATARH = 40;
+const AVATARW = 50;
+const AVATARH = 50;
 const COLLENGTH = 10;
 const WALLW = 20;
 const ROWLENGTH = 9;
@@ -111,7 +111,7 @@ function myGameArea(ri, iq, r, temp)  {
         var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
         var rightBound = new component(WALLW, AREAH, "purple", 480, 0, this);
         var floorBound = new component(AREAW, WALLW, "purple", 0, 550, this);
-		instance.blank = new component(AVATARW, AVATARH, "grey", 25, 620, this);
+		instance.blank = new component(AVATARW, AVATARH, "grey", 25, 650, this);
 		instance.loadedShot = new component(AVATARW, AVATARH, shot, 225, 500, this);
 		shotFlag = 0;
 		/*
@@ -225,19 +225,23 @@ function readInput(instance) {
     $(document).keydown(function(e) {
     var keyCode = e.keyCode;
     if (keyCode == 37) {
+		e.preventDefault();
         instance.myAvatar.x -= 50;
 		instance.loadedShot.x -= 50;
     }
     if (keyCode == 39) {
+		e.preventDefault();
         instance.myAvatar.x += 50;
 		instance.loadedShot.x += 50;
     }
     if (keyCode == 38) {
+		e.preventDefault();
 		//shootProjectile(instance);
 		shotFlag = 1;
     }
     if (keyCode == 40) {
-	swapShot(instance);
+		e.preventDefault();
+		swapShot(instance);
     }
     });
 
@@ -344,8 +348,12 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
     floorBound.update();
 	p.blank.update();
 	if (shotFlag == 1 && p.isP1) {
-		p.loadedShot.y -= 3;
-	}	
+		p.loadedShot.speedY = -10;
+	}
+	else {
+		p.loadedShot.speedY = 0;
+	}
+	p.loadedShot.newPos();	
 	p.loadedShot.update();
 	/*
 	for (var i = 0; i < 11; i++) {
@@ -373,8 +381,20 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
         myAvatar.update()
     }
     */
-	checkMatch(p);
-    rows(p, queue);
+	rows(p, queue);
+	var ctx = p.canvas.getContext("2d");
+    var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
+    //console.log(shotData);
+    var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
+	var blankData = ctx.getImageData(p.blank.x, p.blank.y, AVATARW, AVATARH);
+    //console.log(compareImages(shotData, checkData));
+    if(compareImages(shotData, checkData)) {
+	    checkMatch(p);
+	}
+	//console.log((compareImages(checkData, blankData)));
+	else if ((compareImages(checkData, blankData))) {
+		shotFlag = 0;
+	}
     /*
     drawRow(row1, 0, p);
     drawRow(row2, 50, p);
@@ -413,7 +433,10 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
 	"row9":row9,
 	"row10":row10,
 	"row11":row11,
-	"ap":j
+	"ap":j,
+	"shoty":p1.loadedShot.y,
+	"shotx":p1.loadedShot.x,
+	"shotcolor":p1.loadedShot.color
     });
 }
 
@@ -430,9 +453,14 @@ function recieveData(data) {
         drawRow(data.row8, 350, p2);
         drawRow(data.row9, 400, p2);
         drawRow(data.row10, 450, p2);
-        drawRow(data.row11, 500, p2);
+        //drawRow(data.row11, 500, p2);
 		//console.log(data.ap);
+		p2.loadedShot.remove();
 		p2.myAvatar.x = data.ap;
+		p2.loadedShot.x = data.shotx;
+		p2.loadedShot.y = data.shoty;
+		p2.loadedShot.color = data.shotcolor;
+		
     }
 }
 
@@ -452,14 +480,14 @@ function rows(p, queue) {
     drawRow(row8, 350, p);
     drawRow(row9, 400, p);
     drawRow(row10, 450, p);
-    drawRow(row11, 500, p);
+    //drawRow(row11, 500, p);
     while (queue.size < 10) {
         queue.enqueue(makeRow(min, max));
     }
     //myAvatar.newPos();
     //myAvatar.update();
     count += 1;
-    if (count == 500) {
+    if (count == 50) {
         insertRow(queue);
 		//checkMatch(p);
         count = 0; 
@@ -473,16 +501,61 @@ function checkMatch(p) {
 	//if (matcher.getContext()) {
 	//	console.log("yeh");
 	//}
-    	
-	var ctx = p.canvas.getContext("2d");
-	var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
+    if(p.isP1) { 	
+	//var ctx = p.canvas.getContext("2d");
+	//var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
 	//console.log(shotData);
-	var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
+	//var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
 	//console.log(compareImages(shotData, checkData));
-	if(compareImages(shotData, checkData)) {
-		ctx.clearRect(p.loadedShot.x, p.loadedShot.y + 50, AVATARW, AVATARH);
+	//if(compareImages(shotData, checkData)) {
+		ctx.fillStyle = "grey";
+		var whichRow = (p.loadedShot.y - 50) / 50;
+		console.log(whichRow);
+		var whichCol = (p.loadedShot.x - 25) / 50;
+		console.log(whichCol);
+		switch(whichRow) {
+			case 0 :
+				row1[whichCol] = 0;
+				break;
+			case 1 :
+                row2[whichCol] = 0;
+                break;
+			case 2 :
+                row3[whichCol] = 0;
+                break;
+			case 3 :
+                row4[whichCol] = 0;
+                break;
+			case 4 :
+                row5[whichCol] = 0;
+                break;
+			case 5 :
+                row6[whichCol] = 0;
+                break;
+			case 6 :
+                row7[whichCol] = 0;
+                break;
+			case 7 :
+                row8[whichCol] = 0;
+                break;
+			case 8 :
+                row9[whichCol] = 0;
+                break;
+			case 9 :
+                row10[whichCol] = 0;
+                break;
+			case 10 :
+                row11[whichCol] = 0;
+                break;
+			default :
+				break;	
+		}
+		p.loadedShot.x = p.myAvatar.x;
+		shotFlag = 0;
+		p.loadedShot.y = 500;
 		
-	} 
+	//} 
+}
 	
 }
 
