@@ -16,6 +16,15 @@ var connection = null;
 r.connect(creds, function(err, conn) {
 	if (err) throw err
   	connection = conn;
+
+	r.dbCreate('GG').run(connection, function() {
+
+
+	});
+
+	r.db("GG").tableCreate("users").run(connection, function() {
+
+	});
 });
 
 // Requires slashes be at end of path and no slash on name

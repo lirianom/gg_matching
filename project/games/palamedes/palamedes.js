@@ -1,7 +1,7 @@
 const BLOCKSPEED = 10;
 const MOVESPEED = 50;
 const AREAW = 500;
-const AREAH = 700;
+const AREAH = 800;
 const AVATARW = 50;
 const AVATARH = 50;
 const COLLENGTH = 10;
@@ -386,14 +386,83 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
     var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
     //console.log(shotData);
     var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
-	var blankData = ctx.getImageData(p.blank.x, p.blank.y, AVATARW, AVATARH);
+	var blankData = ctx.getImageData(225, 650, AVATARW, AVATARH);
     //console.log(compareImages(shotData, checkData));
     if(compareImages(shotData, checkData)) {
 	    checkMatch(p);
 	}
-	//console.log((compareImages(checkData, blankData)));
-	else if ((compareImages(checkData, blankData))) {
-		shotFlag = 0;
+	//console.log(compareImages(checkData, blankData));
+	else if ((p.loadedShot.y % 50 == 0) && (!(compareImages(checkData, blankData)))) {
+		//ctx.fillStyle = p.loadedShot.color;
+		//ctx.fillRect(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
+	    var whichRow = (p.loadedShot.y) / 50;
+        //console.log(whichRow);
+        var whichCol = (p.loadedShot.x - 25) / 50;
+        //console.log(whichCol);
+		var cNum = 0;
+		switch(p.loadedShot.color) {
+			case "blue" :
+				cNum = 1;
+				break;
+			case "brown" :
+                cNum = 2;
+                break;
+			case "yellow" :
+                cNum = 3;
+                break;
+			case "pink" :
+                cNum = 4;
+                break;
+			case "orange" :
+                cNum = 5;
+                break;
+			case "green" :
+                cNum = 6;
+                break;
+			default :
+				break;
+
+		}
+        switch(whichRow) {
+            case 0 :
+                row1[whichCol] = cNum;
+                break;
+            case 1 :
+                row2[whichCol] = cNum;
+                break;
+            case 2 :
+                row3[whichCol] = cNum;
+                break;
+            case 3 :
+                row4[whichCol] = cNum;
+                break;
+            case 4 :
+                row5[whichCol] = cNum;
+                break;
+            case 5 :
+                row6[whichCol] = cNum;
+                break;
+            case 6 :
+                row7[whichCol] = cNum;
+                break;
+            case 7 :
+                row8[whichCol] = cNum;
+                break;
+            case 8 :
+                row9[whichCol] = cNum;
+                break;
+            case 9 :
+                row10[whichCol] = cNum;
+                break;
+            case 10 :
+                row11[whichCol] = cNum;
+                break;
+            default :
+                break;
+        }	
+		p.loadedShot.x = p.myAvatar.x;
+        shotFlag = 0;
+        p.loadedShot.y = 500;	
 	}
     /*
     drawRow(row1, 0, p);
@@ -487,7 +556,7 @@ function rows(p, queue) {
     //myAvatar.newPos();
     //myAvatar.update();
     count += 1;
-    if (count == 50) {
+    if (count == 250) {
         insertRow(queue);
 		//checkMatch(p);
         count = 0; 
@@ -510,9 +579,9 @@ function checkMatch(p) {
 	//if(compareImages(shotData, checkData)) {
 		ctx.fillStyle = "grey";
 		var whichRow = (p.loadedShot.y - 50) / 50;
-		console.log(whichRow);
+		//console.log(whichRow);
 		var whichCol = (p.loadedShot.x - 25) / 50;
-		console.log(whichCol);
+		//console.log(whichCol);
 		switch(whichRow) {
 			case 0 :
 				row1[whichCol] = 0;
