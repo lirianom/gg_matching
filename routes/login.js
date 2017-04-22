@@ -1,3 +1,21 @@
+function checkIfCurrentUsername(user, connection) {
+	
+	r.table("users").filter({"username":user}).run(connection, 
+		function(err, cursor) {
+			if (err) throw err;
+			cursor.toArray(function(err, result) {
+				console.log(result);
+				if (result.length != 0) {
+					
+					return true;
+				}
+			});			
+		}
+	);
+
+	return false;
+}
+
 function getResult(gameResult) {
 	var selector;
 	if (gameResult == 1) {
@@ -197,16 +215,71 @@ addFriend: function(req,res,connection,r,limit) {
         console.log("Failed to add friend on server within 10 tries.");
     }
 
+	// check if user name exists
 	if ( confirmed_id != null) {
-        r.table('users').get(confirmed_id).update({"friends":r.row("friends").append({"username":req.body.newFriend,"chatId":"0"})}).run(connection,
-            function(err, cursor) {
-                if (err) throw err;
-				console.log(cursor);
-                res.send({"addFriend":true});
-            }
-         );
+		//if (!checkIfCurrentUsername(req.body.friend,connection)) { res.send({"addFriend":false, "username":req.body.friend}); console.log("wat"); }
+		//else {
+		//console.log("elese");
+		 r.table("users").filter({"username":req.body.friend}).run(connection,
+        function(err, cursor) {
+            if (err) throw err;
+            cursor.toArray(function(err, result) {
+                console.log(result);
+                if (result.length != 0) {
+	
+		r.table('users').get(confirmed_id)("friends").filter({"username":req.body.friend}).run(connection,
+			function(err, cursor) {
+				if (err) throw err;
+				cursor.toArray(function(err,result) {
+					if (err) throw err;
+					if (result.length == 0) {
+         				r.table('users').get(confirmed_id).update({"friends":r.row("friends").append({"username":req.body.friend,"chatId":"0"})}).run(connection,
+            				function(err, cursor) {
+                				if (err) throw err;
+                				res.send({"addFriend":true, "username":req.body.friend});
+            				}
+         				);
+					}
+					else  {
+
+						res.send({"addFriend":false, "username":req.body.friend});
+					} 
+				});
+			}
+		);
+		}})});
     }
 
+},
+
+retryDeleteFriend: function(req,res,connection,r,limit) {
+    // Can improve this similar to enterRankedConnectionQueue
+    setTimeout(function() {module.exports.deleteFriend(req,res,connection,r, limit); }, 100);
+},
+
+deleteFriend: function(req,res,connection,r,limit) {
+    var confirmed_id = module.exports.checkAuth(req);
+
+    if (confirmed_id == null && limit < 10) {
+        limit = limit + 1;
+        module.exports.retryDeleteFriend(req,res,connection,r, limit);
+    }
+    if (!(limit < 10)) {
+        console.log("Failed to delete friend on server within 10 tries.");
+    }
+	
+	if ( confirmed_id != null) {
+
+		r.table("users").get(confirmed_id).update(function(row) {
+			return {
+				"friends": row("friends").filter(function(item) { return item("username").ne(req.body.friend) } )
+			}
+		}).run(connection, function(err, cursor) {
+				if (err) throw err;
+				console.log(cursor);
+				res.send({"deleteFriend":true,"username":req.body.friend});
+			});
+	}
 },
 
 retryGetFriends: function(req,res,connection,r,limit) {

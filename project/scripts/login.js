@@ -35,19 +35,26 @@ function onSignIn(googleUser) {
 			
 			if (data[0] != undefined) { 
 				displayUsername(data[0].username);
-				displayFriends(data[0].friends);
+				displayFriends(id_token,data[0].friends);
 			}
 			else { 
 				setUsername(id_token, profile);
+				displayFriends(id_token,data[0].friends);
 			}
 		}
 	});
 };
+function clearPage() {
+	$("#display_name").html("");
+    $("#gameList").html("");
+    $("#friendsList").html("");
+    $("#gameLinks").html("");
+
+}
 
 function signOut() {
    	var auth2 = gapi.auth2.getAuthInstance();
-	$("#display_name").remove();
-	$("#gameLinks").html("");
+	clearPage();
    	auth2.signOut().then(function () {
    		console.log('User signed out.');
    	});
@@ -71,15 +78,69 @@ function setUsername(id_token, profile) {
 
 }
 
-function displayFriends(friends) {
-	console.log(friends);
+function displayFriends(id_token,friends) {
+	
+	if ($("#friendsList").length == 1) { 
+     	$("#friendsList").append($("<br>"));
+		$("#friendsList").append("Friends");
+		$("#friendsList").append("<br>");
+		$("#friendsList").append("<input type='text' id='addFriend' placeholder='Add friend by username.'>");
+		$("#addFriend").keypress(function (e) {
+
+        	if (e.which == 13) { // error if not logged in change to only trigger a
+            	var friend = $("#addFriend").val();
+            	$("#addFriend").val("");
+
+            	$.ajax({
+                	type: "POST",
+                	url: "/addFriend",
+                	data : {"id": id_token, "friend": friend},
+                	success : function(data) {
+                    	console.log(data);
+						if (data.addFriend == true) {
+             				$("#friendsList").append($("<br>"));
+							$("#friendsList").append(data.username);
+						}
+                	}
+
+            	})
+        	}
+    	});	
+		$.each(friends, function( value ) {
+			$("#friendsList").append($("<br>"));
+		    $("#friendsList").append(friends[value].username);
+		});
+
+		$("#friendsList").append("<input type='text' id='delFriend' placeholder='Delete friend by username.'>");
+		$("#delFriend").keypress(function (e) {
+
+            if (e.which == 13) { // error if not logged in change to only trigger a
+                var friend = $("#delFriend").val();
+                $("#delFriend").val("");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/deleteFriend",
+                    data : {"id": id_token, "friend": friend},
+                    success : function(data) {
+                        console.log(data);
+                        if (data.deleteFriend == true) {
+                            $("#friendsList").append($("<br>"));
+                            $("#friendsList").append("deleted " + data.username);
+                        }
+                    }
+
+                })
+            }
+        });
+	}
 
 }
 
 function displayUsername(username) {
     if (username != undefined)
     {
-		if ($("#display_name").length != 1) {
+		if ($("#display_name").val() == undefined || $("#display_name").val() == 0) {
     		$("#nav").prepend("<li id='display_name' class='color_orange'>" + username + "</li>");
 		}
     }
@@ -95,6 +156,7 @@ function displayUsername(username) {
 			FrameworkInit();
 		}
 	}
+	
 }
 
 // Restrict so that on displays on homepage
@@ -105,3 +167,5 @@ function linkGames() {
         });
     })
 }
+
+

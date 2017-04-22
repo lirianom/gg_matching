@@ -47,7 +47,6 @@ var sampleBl;
 var sampleG;
 var shotFlag;
 
-//var rowWorker = new Worker('workRow.js');
 
 function Queue() {
     this.oldestIndex = 1;
@@ -80,11 +79,6 @@ Queue.prototype.dequeue = function() {
 
 
 $(document).ready(function() {
-    //myAvatar = new component(AVATARW, AVATARH, "red", 225, 570);
-    //leftBound = new component(WALLW, AREAH, "purple", 0, 0);
-    //rightBound = new component(WALLW, AREAH, "purple", 480, 0);
-    //floorBound = new component(AREAW, WALLW, "purple", 0, 550);
-    //Framework.readyUp();
     Framework.defineHandleData(recieveData);
     Framework.defineGame(gameStart);
     Framework.defineInitialState(function(){});
@@ -114,20 +108,6 @@ function myGameArea(ri, iq, r, temp)  {
 		instance.blank = new component(AVATARW, AVATARH, "grey", 25, 650, this);
 		instance.loadedShot = new component(AVATARW, AVATARH, shot, 225, 500, this);
 		shotFlag = 0;
-		/*
-		instance.spaces = new Array(11);
-		for (var i = 0; i < 11; i++) {
-			instance.spaces[i] = new Array(9);
-		}
-		//console.log(instance.spaces);
-		for (var i = 0; i < 11; i++) {
-			for (var j = 0; j < 9; j++) {
-				instance.spaces[i][j] = new component(AVATARW, AVATARH, "grey", 10000, 10000, this);
-				//instance.spaces[i][j] = 1;
-			}
-		}
-		*/  
-        //array = new int[][];
         min = Math.ceil(CEIL);
         max = Math.floor(FLOOR);
         this.canvas.width = AREAW;
@@ -136,9 +116,6 @@ function myGameArea(ri, iq, r, temp)  {
         $("body").append(this.canvas);
         var queue = new Queue();
         queue = iq(queue);
-        //for (var i = 0; i < QUEUELENGTH; i++) {
-        //     queue.enqueue(makeRow(min, max));
-        //
         this.interval1 = setInterval(function() {
 	    $(instance.canvas).stop(true,true);
             updateGameArea(instance.myAvatar, leftBound, rightBound, floorBound, instance, queue, r);
@@ -177,46 +154,10 @@ function myGameArea(ri, iq, r, temp)  {
         ctx.fillRect(25, 570, AVATARW, AVATARH);
         sampleG = ctx.getImageData(25, 570, AVATARW, AVATARH);			
 		
-        /*
-        window.addEventListener("keydown", function(e) {
-            myGameArea.keys = (myGameArea.keys || []);
-            myGameArea.keys[e.keyCode] = true;
-        })
-        window.addEventListener('keyup', function (e) {
-            myGameArea.keys[e.keyCode] = false;
-        })
-        */
-        /*
-        for (int i = 0; i < QUEUELENGTH; i++) {
-            for (int j = 0; j < ROWLENGTH; j++) {
-                array[i][j] = Math.floor(Math.random() * ((max+1)-min)) + min;    
-            }
-        }
-        */
-        /*
-        queue = new Queue(); 
-        for (var i = 0; i < QUEUELENGTH; i++) {
-             queue.enqueue(makeRow(min, max));
-        }
-        */ 
-   
-            /*
-            var keyCode = e.keyCode;
-            if (keyCode == 37) {
-                instance.myAvatar.x -= 50;
-            }
-            if (keyCode == 39) {
-                instance.myAvatar.x += 50;
-            }
-            */
         ri(instance);   
-        //})
         
 
     }
-    //clear : function () {
-    //    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    //}
     }
     return instance;
 }
@@ -236,7 +177,6 @@ function readInput(instance) {
     }
     if (keyCode == 38) {
 		e.preventDefault();
-		//shootProjectile(instance);
 		shotFlag = 1;
     }
     if (keyCode == 40) {
@@ -355,13 +295,6 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
 	}
 	p.loadedShot.newPos();	
 	p.loadedShot.update();
-	/*
-	for (var i = 0; i < 11; i++) {
-		for (var j = 0; j < 9; j++) {
-			p.spaces[i][j].update();
-		}
-	}
-	*/
     if (myAvatar.x < 25) {
         myAvatar.x = 25;
 		p.loadedShot.x = 25;
@@ -370,35 +303,17 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
         myAvatar.x = 425;
 		p.loadedShot.x = 425;
     }
-    /*
-    if (myAvatar.crashWith(leftBound)) {
-         myAvatar.x = 50;
-    }
-    else if (myAvatar.crashWith(rightBound)) {
-        myAvatar.x = 225;
-    }
-    else {
-        myAvatar.update()
-    }
-    */
 	rows(p, queue);
 	var ctx = p.canvas.getContext("2d");
     var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
-    //console.log(shotData);
     var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
 	var blankData = ctx.getImageData(225, 650, AVATARW, AVATARH);
-    //console.log(compareImages(shotData, checkData));
     if(compareImages(shotData, checkData)) {
 	    checkMatch(p);
 	}
-	//console.log(compareImages(checkData, blankData));
 	else if ((p.loadedShot.y % 50 == 0) && (!(compareImages(checkData, blankData)))) {
-		//ctx.fillStyle = p.loadedShot.color;
-		//ctx.fillRect(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
 	    var whichRow = (p.loadedShot.y) / 50;
-        //console.log(whichRow);
         var whichCol = (p.loadedShot.x - 25) / 50;
-        //console.log(whichCol);
 		var cNum = 0;
 		switch(p.loadedShot.color) {
 			case "blue" :
@@ -464,29 +379,6 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
         shotFlag = 0;
         p.loadedShot.y = 500;	
 	}
-    /*
-    drawRow(row1, 0, p);
-    drawRow(row2, 50, p);
-    drawRow(row3, 100, p);
-    drawRow(row4, 150, p);
-    drawRow(row5, 200, p);
-    drawRow(row6, 250, p);
-    drawRow(row7, 300, p);
-    drawRow(row8, 350, p);
-    drawRow(row9, 400, p);
-    drawRow(row10, 450, p);
-    drawRow(row11, 500, p);
-    while (queue.size < 10) {
-        queue.enqueue(makeRow(min, max));
-    }
-    myAvatar.newPos();
-    myAvatar.update();
-    count += 1;
-    if (count == 50) {
-        insertRow(queue);
-        count = 0;
-    }
-    */
     var j = p1.myAvatar.x;
 	
     Framework.sendData({
@@ -523,7 +415,6 @@ function recieveData(data) {
         drawRow(data.row9, 400, p2);
         drawRow(data.row10, 450, p2);
         //drawRow(data.row11, 500, p2);
-		//console.log(data.ap);
 		p2.loadedShot.remove();
 		p2.myAvatar.x = data.ap;
 		p2.loadedShot.x = data.shotx;
@@ -553,35 +444,19 @@ function rows(p, queue) {
     while (queue.size < 10) {
         queue.enqueue(makeRow(min, max));
     }
-    //myAvatar.newPos();
-    //myAvatar.update();
     count += 1;
     if (count == 250) {
         insertRow(queue);
-		//checkMatch(p);
         count = 0; 
     }
 
 }
 
 function checkMatch(p) {
-	//var ctx = p.canvas.getContext("2d");
-	//var matcher = ctx.rect(p.loadedShot.x, p.loadedShot.y + 50, 50, 50);
-	//if (matcher.getContext()) {
-	//	console.log("yeh");
-	//}
     if(p.isP1) { 	
-	//var ctx = p.canvas.getContext("2d");
-	//var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
-	//console.log(shotData);
-	//var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
-	//console.log(compareImages(shotData, checkData));
-	//if(compareImages(shotData, checkData)) {
 		ctx.fillStyle = "grey";
 		var whichRow = (p.loadedShot.y - 50) / 50;
-		//console.log(whichRow);
 		var whichCol = (p.loadedShot.x - 25) / 50;
-		//console.log(whichCol);
 		switch(whichRow) {
 			case 0 :
 				row1[whichCol] = 0;
@@ -623,7 +498,6 @@ function checkMatch(p) {
 		shotFlag = 0;
 		p.loadedShot.y = 500;
 		
-	//} 
 }
 	
 }
@@ -650,11 +524,6 @@ function makeRow(min, max) {
 function insertRow(queue) {
     var d = queue.dequeue();
     for (var i = 0; i < ROWLENGTH; i++) {
-        //if (row11[i] != 0) {
-        //    endGame();
-        //}
-        //else {
-        //use storage to get all the keys
             row11[i] = row10[i];
             row10[i] = row9[i];
             row9[i] = row8[i];
@@ -666,12 +535,10 @@ function insertRow(queue) {
             row3[i] = row2[i];
             row2[i] = row1[i];
             row1[i] = d[i];
-        //}
     }
     queue.enqueue(makeRow(min, max));
 }
 
-//var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
 
 function drawRow(row, y, p) {
 
@@ -698,50 +565,6 @@ function drawRow(row, y, p) {
 
     }
 
-/*
-	//console.log(p);
-	//console.log(p.spaces);
-    var x = 25;
-	var rowIndex = 0;
-	var color;
-    for (var i = 0; i < ROWLENGTH; i++) {
-       
-		switch(row[i]) {
-			case 0:
-				color = "grey";
-				//p.spaces[i][rowIndex].remove = false;
-			case 1:
-				color = "blue";
-				break;
-			case 2: 
-				color = "brown";
-				break;
-		    case 3:
-                color = "yellow";
-                break;
-			case 4:
-                color = "pink";
-                break;
-			case 5:
-                color = "orange";
-                break;
-			case 6:
-                color = "green";
-                break;
-			default:
-                break;
-		}
-		
-		//p.spaces[i][rowIndex].remove;
-
-		//console.log(p.spaces);
-		//p.spaces[i][rowIndex].change(color, x, y);
-		x += 50;
-		rowIndex++;
-	       
-    }
-
-*/
 }
 
 

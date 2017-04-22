@@ -72,6 +72,10 @@ app.post('/addFriend', function(req, res, next) {
     routes.addFriend(req,res,connection,r, 0 );
 });
 
+app.post('/deleteFriend', function(req, res, next) {
+    routes.deleteFriend(req,res,connection,r, 0 );
+});
+
 app.post('/getFriends', function(req, res, next) {
     routes.getFriends(req,res,connection,r, 0 );
 });
@@ -84,6 +88,7 @@ app.post('/getChatId', function(req, res, next) {
 app.post('/setChatId', function(req, res, next) {
     routes.setChatId(req,res,connection,r, 0 );
 });
+
 
 
 server.on('connection', function(id) {
