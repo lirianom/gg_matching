@@ -101,3 +101,55 @@ Optional tags are the chat_bar and the friendsList
     </div>
 </body>
 ```
+
+#### Setting up the JS file
+
+Define functions that the framework allows you to hook onto
+```
+$(document).ready(function() {
+
+    Framework.defineHandleData(handleData); // what to do when recieving data
+    Framework.defineCountdownComplete(countdownComplete); // if game uses timer define what happens when count down over
+    Framework.defineGame(game); // main game loop
+    Framework.defineEndGameCleanUp(gameComplete); // what happens when game is finished
+    Framework.defineInitialState(initial); // setup the initial state of the game
+});
+```
+
+
+Framework.defineHandleData (Required) :
+
+Data is sent as JSON and it is of your choice on how to organize that data
+
+Framework.defineGame ( Required ) :
+
+Framework.defineMain game loop that defines moves
+
+Framework.defineEndGameCleanUp ( Required ) :
+
+Display who won  and set winner the game remove moves
+
+Framework.defineInitialState ( Required ) :
+
+Setup initial components and variables. This function is called again to start a "rematch".
+
+Framework.defineCountDownComplete ( Optional ) :
+
+What happens in the game when Framework.countdown() is complete. 
+
+
+Useful framework functions
+
+Framework.getGame() gets access to game state that gets created 
+Framework.getPeerId() gets peerJS id of User
+Framework.getRating() returns rating for current user on current game
+Framework.forceEndCountDown() finishes countdown for both players
+Framework.sendData() pass JSON formatted data into this to send to other peer. HandleData recieves this sent data.
+
+Useful Framework.getGame() functions
+
+Framework.getGame().initializeTurnGame() picks a player to start as currentTurn.
+Framework.getGame().currentTurn() returns player whose turn it is. Use this to allow moves on their turn. Only use after initializeTurnGame()
+Framework.getGame().setWinner(id) define the winner of the game
+Framework.getGame().setGameOver()  ends the game updates player ratings
+Framework.getGame().endTurn() for turn based games switches currentTurn to other player
