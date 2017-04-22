@@ -32,8 +32,8 @@ function countdownComplete() {
 }
 
 function initial() {
-	
-}
+
+}	
 
 /*
 	Game specific functions

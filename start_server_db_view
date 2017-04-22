@@ -1,2 +1,2 @@
 rethinkdb --bind all & 
-../node_modules/nodemon/bin/nodemon.js server.js project/game-config.json ../private/creds.json
+../node_modules/nodemon/bin/nodemon.js server.js project/game-config.json creds.json

@@ -1,20 +1,3 @@
-function checkIfCurrentUsername(user, connection) {
-	
-	r.table("users").filter({"username":user}).run(connection, 
-		function(err, cursor) {
-			if (err) throw err;
-			cursor.toArray(function(err, result) {
-				console.log(result);
-				if (result.length != 0) {
-					
-					return true;
-				}
-			});			
-		}
-	);
-
-	return false;
-}
 
 function getResult(gameResult) {
 	var selector;
@@ -363,17 +346,6 @@ getChatId: function(req,res,connection,r,limit) {
                 //console.log(cursor);
                 cursor.toArray(function(err, result) {
                     if (err) throw err;
-                    /*if (result.length == 0) {
-                        var userObj = {"id":confirmed_id}
-                        r.table('users').insert([userObj]).run(connection, function(err, result) {
-                            if (err) throw err;
-                            console.log(JSON.stringify(result, null, 2));
-                            res.send( userObj );
-                        })
-                    }
-                    else {
-                        res.send(result);
-                    }*/
 					console.log(result[0]);
 					res.send(result[0]);
                 });
@@ -388,13 +360,25 @@ getChatId: function(req,res,connection,r,limit) {
 setupUser: function(req,res,connection,r) {
 	var confirmed_id = module.exports.checkAuth(req);
 	if ( confirmed_id != null) {
-    	r.table('users').get(confirmed_id).update({"username":req.body.username,"friends":[]}).run(connection,
+		r.table('users').filter({"username":req.body.username}).run(connection,
             function(err, cursor) {
                 if (err) throw err;
-                console.log(req.body.username);
-				res.send(req.body.username);
-            }
-		);
+                cursor.toArray(function(err,result) {
+                    if (err) throw err;
+                    if (result.length == 0) {
+    					r.table('users').get(confirmed_id).update({"username":req.body.username,"friends":[]}).run(connection,
+            				function(err, cursor) {
+                				if (err) throw err;
+                				console.log(req.body.username);
+								res.send({"setUsername":true, "username":req.body.username});
+							}
+						);
+            		}
+					else res.send({"setUsername": false});
+				
+				});
+			}
+		);		
 	};
 
     console.log("New Username: " + req.body.username);

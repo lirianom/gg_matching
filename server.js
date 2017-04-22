@@ -1,7 +1,12 @@
-var routes = require("./routes/login.js");
+// Server side handle of login and database queries
+var routes = require("./routes/handleEndpoints.js");
+
+// Read in arguments for gameConfig and database creds
 var fs = require('fs');
 var gameConfig = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 var creds = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
+
+// Loading server related things for PeerJS
 var express = require('express');
 var app = express();
 var ExpressPeerServer = require('peer').ExpressPeerServer;
@@ -10,13 +15,13 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
+// Initialize rethinkdb Connection
 r = require("rethinkdb");
 var connection = null;
-r.connect(creds, function(err, conn) {
+r.connect( creds, function(err, conn) {
 	if (err) throw err
   	connection = conn;
-
+	// Create db and table if necessary
 	r.dbCreate('GG').run(connection, function() {
 
 
@@ -37,17 +42,21 @@ gameConfig.games.forEach(function (val) {
 
 });
 
+// load homepage
 app.get("/", function(req, res, next) {
     console.log("/");
     res.sendFile("project/index.html", {root : __dirname } );
 });
 
+// Open web app on port 9000 allow peer's to discover each other
 var server = app.listen(9000);
 var options = { debug : true, allow_discovery : true , proxied:true};
 
 app.use('/', ExpressPeerServer(server,options));
 app.use("/" + gameConfig.main_directory, express.static(__dirname + '/' + gameConfig.main_directory));
 
+
+// API endpoints
 app.post('/login', function(req, res, next) {
 	routes.login(req,res,connection,r,0);
 });

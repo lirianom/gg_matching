@@ -38,9 +38,9 @@ function defineFramework() {
 var Framework = {};
 
 // Temp function to test open connection
-$(document).keypress(function ( e) {
+/*$(document).keypress(function ( e) {
 	Framework.sendData({});
-});
+});*/
 
 var peer;
 var chatPeer;

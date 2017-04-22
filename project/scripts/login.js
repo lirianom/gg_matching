@@ -72,7 +72,13 @@ function setUsername(id_token, profile) {
 		url: "/setupUser",
 		data: { "id": id_token, "gu" : "verify", "username" : username},
 		success: function(data) {
-			displayUsername(data);
+			if (data.setUsername == true) {
+				displayUsername(data.username);
+				displayFriends(id_token,undefined);
+			}
+			else {
+				setUsername(id_token, profile);
+			}
 		}
 	});
 
