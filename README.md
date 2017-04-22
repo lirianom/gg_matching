@@ -128,7 +128,7 @@ $(document).ready(function() {
 
 
 
-#####Useful Framework functions
+###Useful Framework functions
 
 Framework.sendData({}) : pass JSON formatted data into this to send to other peer. HandleData recieves this sent data.
 
@@ -141,7 +141,7 @@ Framework.getRating() : returns rating for current user on current game
 Framework.forceEndCountDown() : finishes countdown for both players
 
 
-#####Useful Framework.getGame() functions
+####Useful Framework.getGame() functions
 
 Framework.getGame().initializeTurnGame() : picks a player to start as currentTurn.
 
