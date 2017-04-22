@@ -128,7 +128,7 @@ $(document).ready(function() {
 
 
 
-#### Useful Framework functions
+##### Useful Framework functions
 
 Framework.sendData({}) : pass JSON formatted data into this to send to other peer. HandleData recieves this sent data.
 
