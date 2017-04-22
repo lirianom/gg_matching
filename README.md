@@ -57,7 +57,7 @@ A More complex example is palamedes which shows a split screen tetris like game.
 
 The required scripts to include are shown below
 You can have local copies of jquery.min.js and peer.js if you would like 
-```
+```html
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
 
@@ -77,7 +77,7 @@ You can have local copies of jquery.min.js and peer.js if you would like
 
 The empty div tags are there for the framework to place different UI elements onto the page.
 Optional tags are the chat_bar and the friendsList
-```
+```html
 <body>
     <div class="login_bar">
         <h5 id="logo" class="color_orange">GG</h5>
@@ -105,7 +105,17 @@ Optional tags are the chat_bar and the friendsList
 #### Setting up the JS file
 
 Define functions that the framework allows you to hook onto
-```
+
+Framework.defineHandleData (Required) : Data is sent as JSON and it is of your choice on how to organize that data
+
+Framework.defineGame ( Required ) : Framework.defineMain game loop that defines moves
+
+Framework.defineEndGameCleanUp ( Required ) : Display who won  and set winner the game remove moves
+
+Framework.defineInitialState ( Required ) : Setup initial components and variables. This function is called again to start a "rematch".
+
+Framework.defineCountDownComplete ( Optional ) : What happens in the game when Framework.countdown() is complete. 
+```javascript
 $(document).ready(function() {
 
     Framework.defineHandleData(handleData); // what to do when recieving data
@@ -117,39 +127,29 @@ $(document).ready(function() {
 ```
 
 
-Framework.defineHandleData (Required) :
 
-Data is sent as JSON and it is of your choice on how to organize that data
+#####Useful Framework functions
 
-Framework.defineGame ( Required ) :
+Framework.sendData({}) : pass JSON formatted data into this to send to other peer. HandleData recieves this sent data.
 
-Framework.defineMain game loop that defines moves
+Framework.getGame() : gets access to game state that gets created 
 
-Framework.defineEndGameCleanUp ( Required ) :
+Framework.getPeerId() : gets peerJS id of User
 
-Display who won  and set winner the game remove moves
+Framework.getRating() : returns rating for current user on current game
 
-Framework.defineInitialState ( Required ) :
-
-Setup initial components and variables. This function is called again to start a "rematch".
-
-Framework.defineCountDownComplete ( Optional ) :
-
-What happens in the game when Framework.countdown() is complete. 
+Framework.forceEndCountDown() : finishes countdown for both players
 
 
-Useful framework functions
+#####Useful Framework.getGame() functions
 
-Framework.getGame() gets access to game state that gets created 
-Framework.getPeerId() gets peerJS id of User
-Framework.getRating() returns rating for current user on current game
-Framework.forceEndCountDown() finishes countdown for both players
-Framework.sendData() pass JSON formatted data into this to send to other peer. HandleData recieves this sent data.
+Framework.getGame().initializeTurnGame() : picks a player to start as currentTurn.
 
-Useful Framework.getGame() functions
+Framework.getGame().currentTurn() : returns player whose turn it is. Use this to allow moves on their turn. Only use after initializeTurnGame()
 
-Framework.getGame().initializeTurnGame() picks a player to start as currentTurn.
-Framework.getGame().currentTurn() returns player whose turn it is. Use this to allow moves on their turn. Only use after initializeTurnGame()
-Framework.getGame().setWinner(id) define the winner of the game
-Framework.getGame().setGameOver()  ends the game updates player ratings
-Framework.getGame().endTurn() for turn based games switches currentTurn to other player
+Framework.getGame().setWinner(id) : define the winner of the game
+
+Framework.getGame().setGameOver()  : ends the game updates player ratings
+
+Framework.getGame().endTurn() : for turn based games switches currentTurn to other player
+
