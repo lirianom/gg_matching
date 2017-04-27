@@ -2,8 +2,8 @@ const BLOCKSPEED = 10;
 const MOVESPEED = 50;
 const AREAW = 500;
 const AREAH = 800;
-const AVATARW = 50;
-const AVATARH = 50;
+const AVATARW = 40;
+const AVATARH = 40;
 const COLLENGTH = 10;
 const WALLW = 20;
 const ROWLENGTH = 9;
@@ -46,6 +46,8 @@ var sampleO;
 var sampleBl;
 var sampleG;
 var shotFlag;
+var combo;
+var comboPoints;
 
 
 function Queue() {
@@ -98,9 +100,10 @@ function myGameArea(ri, iq, r, temp)  {
 		this.context.clearRect(0, 550, 500, this.canvas.height);
 	},
     clear : function () {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.clearRect(0, 0, this.canvas.width, 699);
     },
     start : function() {
+		combo = [0,0,0,0,0,0];
         instance.myAvatar = new component(AVATARW, AVATARH, "red", 225, 570, this);
         var leftBound = new component(WALLW, AREAH, "purple", 0, 0, this);
         var rightBound = new component(WALLW, AREAH, "purple", 480, 0, this);
@@ -183,12 +186,88 @@ function readInput(instance) {
 		e.preventDefault();
 		swapShot(instance);
     }
+	if (keyCode == 32) {
+		e.preventDefault();
+		popCombo();
+	}
     });
 
 }
 
-function shootProjectile(instance) {
-				        
+function popCombo() {
+	comboPoints = 0;
+	var threePairsFlag = 0;
+	var copiesCheck = [-1,-1,-1,-1,-1,-1];
+	for (var i = 0; i < combo.length; i++) {
+		switch(countInArray(combo, combo[i])) {
+			case 2:
+				if (combo[i] != copiesCheck[combo[i]-1]) {
+                       copiesCheck[combo[i]-1] = combo[i];
+                       threePairsFlag += 1;
+                }
+                break;
+			case 3:
+				if (combo[i] != copiesCheck[combo[i]-1]) {
+						copiesCheck[combo[i]-1] = combo[i];
+						comboPoints += 1;
+				}
+			    break;
+			case 4:
+				if (combo[i] != copiesCheck[combo[i]-1]) {
+                        copiesCheck[combo[i]-1] = combo[i];
+                        comboPoints += 2;
+                }
+                break;
+			case 5:
+			case 6:
+				 if (combo[i] != copiesCheck[combo[i]-1]) {
+                        copiesCheck[combo[i]-1] = combo[i];
+                        comboPoints += 3;
+                }
+                break;
+			default:
+				break;
+		}
+		if (threePairsFlag == 3) {
+			comboPoints += 3;
+			threePairsFlag = 0;
+		}
+		}
+		for (var i = 0; i < combo.length; i++) {
+		if (i != combo.length-1 && i != combo.length-2) {
+			if (combo[i]+1 == combo[i+1] && combo[i+1]+1 == combo[i+2]) {
+				comboPoints += 1;
+				if (i+3 < combo.length) {
+					if (combo[i+2]+1 == combo[i+3]) {
+						comboPoints += 1;
+						if (i+4 < combo.length) {
+							if (combo[i+3]+1 == combo[i+4]) {
+								comboPoints += 1;
+								if (i+5 < combo.length) {
+									if (combo[i+4]+1 == combo[i+5]) {
+										comboPoints += 2;
+									} else {i+=5;}
+								}   
+							} else {i+=4;}
+						}
+					} else {i+=3;}
+				}
+			}
+		}
+
+		
+	}
+	console.log(comboPoints);					        
+}
+
+function countInArray(array, what) {
+    var count = 0;
+    for (var i = 0; i < array.length; i++) {
+        if (array[i] === what) {
+            count++;
+        }
+    }
+    return count;
 }
 
 function swapShot(instance) {
@@ -293,22 +372,25 @@ function updateGameArea(myAvatar, leftBound, rightBound, floorBound, p, queue, r
 	else {
 		p.loadedShot.speedY = 0;
 	}
+	var OOB = false;
 	p.loadedShot.newPos();	
 	p.loadedShot.update();
     if (myAvatar.x < 25) {
         myAvatar.x = 25;
 		p.loadedShot.x = 25;
+		OOB = true;
     }
     if (myAvatar.x > 425) {
         myAvatar.x = 425;
 		p.loadedShot.x = 425;
+		OOB = true;
     }
 	rows(p, queue);
 	var ctx = p.canvas.getContext("2d");
     var shotData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y, AVATARW, AVATARH);
     var checkData = ctx.getImageData(p.loadedShot.x, p.loadedShot.y - 50, AVATARW, AVATARH);
 	var blankData = ctx.getImageData(225, 650, AVATARW, AVATARH);
-    if(compareImages(shotData, checkData)) {
+    if(compareImages(shotData, checkData) && !OOB) {
 	    checkMatch(p);
 	}
 	else if ((p.loadedShot.y % 50 == 0) && (!(compareImages(checkData, blankData)))) {
@@ -457,38 +539,50 @@ function checkMatch(p) {
 		ctx.fillStyle = "grey";
 		var whichRow = (p.loadedShot.y - 50) / 50;
 		var whichCol = (p.loadedShot.x - 25) / 50;
+		var savedBlock;
 		switch(whichRow) {
 			case 0 :
+				savedBlock = row1[whichCol];
 				row1[whichCol] = 0;
 				break;
 			case 1 :
+				savedBlock = row2[whichCol];
                 row2[whichCol] = 0;
                 break;
 			case 2 :
+				savedBlock = row3[whichCol];
                 row3[whichCol] = 0;
                 break;
 			case 3 :
+				savedBlock = row4[whichCol];
                 row4[whichCol] = 0;
                 break;
 			case 4 :
+				savedBlock = row5[whichCol];
                 row5[whichCol] = 0;
                 break;
 			case 5 :
+				savedBlock = row6[whichCol];
                 row6[whichCol] = 0;
                 break;
 			case 6 :
+				savedBlock = row7[whichCol];
                 row7[whichCol] = 0;
                 break;
 			case 7 :
+				savedBlock = row8[whichCol];
                 row8[whichCol] = 0;
                 break;
 			case 8 :
+				savedBlock = row9[whichCol];
                 row9[whichCol] = 0;
                 break;
 			case 9 :
+				savedBlock = row10[whichCol];
                 row10[whichCol] = 0;
                 break;
 			case 10 :
+				savedBlock = row11[whichCol];
                 row11[whichCol] = 0;
                 break;
 			default :
@@ -498,6 +592,30 @@ function checkMatch(p) {
 		shotFlag = 0;
 		p.loadedShot.y = 500;
 		
+		for (var i = 0; i < 5; i++) {
+			combo[i] = combo[i+1];
+		}
+		combo[5] = savedBlock;
+		console.log(combo);
+	    for (var i = 0; i < combo.length; i++) {
+			if (combo[i] != 0) {
+        if (combo[i] == 1) {
+            ctx.fillStyle = "blue";
+        } else if (combo[i] == 2) {
+            ctx.fillStyle = "brown";
+        } else if (combo[i] == 3) {
+            ctx.fillStyle = "yellow";
+        } else if (combo[i] == 4) {
+            ctx.fillStyle = "pink";
+        } else if (combo[i] == 5) {
+            ctx.fillStyle = "orange";
+        } else if (combo[i] == 6) {
+            ctx.fillStyle = "green";
+        }
+        ctx.fillRect((i*50)+50, 700, AVATARW, AVATARH);
+        }
+
+		}		
 }
 	
 }

@@ -125,6 +125,7 @@ checkAuth: function(req) {
     // http://stackoverflow.com/questions/34833820/do-we-need-to-hide-the-google-oauth-client-id
 	// https://developers.google.com/identity/protocols/OAuth2UserAgent
 	//https://developers.google.com/identity/protocols/OAuth2
+	
     var CLIENT_ID = "585757099412-82kcg563ohunnb0t4kmq8el85ak8n3rp.apps.googleusercontent.com";
     var GoogleAuth = require('google-auth-library');
     var auth = new GoogleAuth;
