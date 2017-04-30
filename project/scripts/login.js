@@ -34,7 +34,7 @@ function onSignIn(googleUser) {
 		success: function(data) {
 			
 			if (data[0] != undefined) { 
-				displayUsername(data[0].username);
+				displayUsername(data[0].username, id_token, profile);
 				displayFriends(id_token,data[0].friends);
 			}
 			else { 
@@ -73,7 +73,7 @@ function setUsername(id_token, profile) {
 		data: { "id": id_token, "gu" : "verify", "username" : username},
 		success: function(data) {
 			if (data.setUsername == true) {
-				displayUsername(data.username);
+				displayUsername(data.username,id_token,profile);
 				displayFriends(id_token,undefined);
 			}
 			else {
@@ -143,8 +143,11 @@ function displayFriends(id_token,friends) {
 
 }
 
-function displayUsername(username) {
-    if (username != undefined)
+function displayUsername(username, id_token, profile) {
+	if (username == "") {
+		setUsername(id_token, profile);
+	}
+    else if (username != undefined)
     {
 		if ($("#display_name").val() == undefined || $("#display_name").val() == 0) {
     		$("#nav").prepend("<li id='display_name' class='color_orange'>" + username + "</li>");

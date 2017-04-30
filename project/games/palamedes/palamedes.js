@@ -195,10 +195,16 @@ function readInput(instance) {
 }
 
 function popCombo() {
+	
+	return comboPoints;
+}
+
+function calcCombo() {
 	comboPoints = 0;
 	var threePairsFlag = 0;
 	var copiesCheck = [-1,-1,-1,-1,-1,-1];
 	for (var i = 0; i < combo.length; i++) {
+		if (combo[i] != 0){
 		switch(countInArray(combo, combo[i])) {
 			case 2:
 				if (combo[i] != copiesCheck[combo[i]-1]) {
@@ -228,12 +234,14 @@ function popCombo() {
 			default:
 				break;
 		}
+		}
 		if (threePairsFlag == 3) {
 			comboPoints += 3;
 			threePairsFlag = 0;
 		}
 		}
 		for (var i = 0; i < combo.length; i++) {
+		if (combo[i] != 0) {
 		if (i != combo.length-1 && i != combo.length-2) {
 			if (combo[i]+1 == combo[i+1] && combo[i+1]+1 == combo[i+2]) {
 				comboPoints += 1;
@@ -245,7 +253,7 @@ function popCombo() {
 								comboPoints += 1;
 								if (i+5 < combo.length) {
 									if (combo[i+4]+1 == combo[i+5]) {
-										comboPoints += 2;
+										comboPoints += 1;
 									} else {i+=5;}
 								}   
 							} else {i+=4;}
@@ -254,10 +262,20 @@ function popCombo() {
 				}
 			}
 		}
+		}
 
 		
 	}
-	console.log(comboPoints);					        
+	var tot = 0;
+	for (var i = 0; i < combo.length; i++) {
+		tot += combo[i];
+	}
+	if (tot == 21) {
+		comboPoints += 1;
+	}
+	console.log(comboPoints);
+	
+						        
 }
 
 function countInArray(array, what) {
@@ -612,7 +630,11 @@ function checkMatch(p) {
         } else if (combo[i] == 6) {
             ctx.fillStyle = "green";
         }
-        ctx.fillRect((i*50)+50, 700, AVATARW, AVATARH);
+		ctx.clearRect(320,700, 100, 50); 
+        ctx.fillRect((i*50)+25, 700, AVATARW, AVATARH);
+		calcCombo();
+		ctx.font = "20px Arial";
+		ctx.fillText("Power: " + comboPoints, 320, 725); 
         }
 
 		}		
