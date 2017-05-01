@@ -93,12 +93,9 @@ app.post('/getChatId', function(req, res, next) {
     routes.getChatId(req,res,connection,r, 0 );
 });
 
-
 app.post('/setChatId', function(req, res, next) {
     routes.setChatId(req,res,connection,r, 0 );
 });
-
-
 
 server.on('connection', function(id) {
 });

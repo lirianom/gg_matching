@@ -1,8 +1,5 @@
 /*
-	Ready
-
-	Required to define own handleData(data) function to interact with data
-	If using countdown you need to define countdownComplete();
+	gg_matching framework visit https://github.com/Capstone2017/gg_matching to learn how to use
 */
 
 isFrameworkSetup = false;
@@ -29,6 +26,7 @@ function FrameworkInit() {
 	});
 }
 
+// Framework defined here
 (function(window) {
 
 'use strict';
@@ -113,7 +111,7 @@ Framework.readyUp = function() {
 	r.attr("id", "readyUp");
 	r.html("Ready Up");
 	$(".connection_bar").append(r);
-	$(".connection_bar").append("<hr>");
+	if (rematch_happened == false) $(".connection_bar").append("<hr>");
 
     $("#readyUp").on("click", function() {
 		if (peer.isConnected()) {
@@ -121,7 +119,7 @@ Framework.readyUp = function() {
 			peer.askForPeersToAgree("readyUp");
 			startGame(readyList);	
 		
-			shareUser();
+			if (rematch_happened == false) shareUser();
 			$("#readyUp").off();
 			$("#readyUp").remove();
 		}
@@ -259,8 +257,10 @@ function _initializeRematch() {
 	});
 }
 
+var rematch_happened = false;
 function startRematch() {
 	if (readyList.length == 2) {
+		rematch_happened = true;
 		Framework.readyUp();
 		readyList = [];
 		initialState();
@@ -271,11 +271,9 @@ function startRematch() {
 function shareUser() {
 	var username = $("#display_name").text();
 	Framework.sendData({"type":"FrameworkInfo","callFunction":"shareUser","username":username});
-	
 }
 
 function _shareUser(data) {
-	
 	$(".connection_bar").append("Opponent Username: " + data.username);
 }
 

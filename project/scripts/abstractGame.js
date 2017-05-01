@@ -87,6 +87,7 @@ Game.prototype.setAllowMoves = function(val) {
 	this.allowMoves = val;
 }
 
+// posts information to the server to update ratings and scores for both players
 Game.prototype._setClientGameOver = function() {
 	var result = 0;
 	this.gameOver = true;
